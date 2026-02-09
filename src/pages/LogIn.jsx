@@ -16,9 +16,9 @@ function Login() {
     const [error, setError] = useState("");
     const [info, setInfo] = useState("");
 
-    useEffect(() => {
-        dispatch(fetchUsers());
-    }, [dispatch]);
+    // useEffect(() => {
+    //     dispatch(fetchUsers());
+    // }, [dispatch]);
 
     const handleSubmit = (e) => {
         e.preventDefault();

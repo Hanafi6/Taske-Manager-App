@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:4000";
+const BASE_URL = "http://localhost:5000";
 
 export const getData = async (endpoint) => {
   const res = await fetch(`${BASE_URL}/${endpoint}`);

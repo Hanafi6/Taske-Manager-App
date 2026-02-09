@@ -3,6 +3,7 @@
     {
       "id": "1",
       "name": "Mahmoud Ahmed",
+      "password": "vddtyhvf@gmail.com",
       "email": "mahmoud@company.com",
       "role": "admin"
     },
@@ -59,6 +60,19 @@
       "name": "Youssef Magdy",
       "email": "youssef@company.com",
       "role": "user"
+    },
+    {
+      "id": "1767874574947",
+      "name": "Mahmoud Ahmed1",
+      "email": "Lacheu7@gmail.com",
+      "password": "mahmoud2002"
+    },
+    {
+      "id": "1768644224740",
+      "name": "ali ahmed",
+      "email": "aliahamed@io.com",
+      "password": "ali_ahmed",
+      "role": "user"
     }
   ],
   "projects": [
@@ -77,6 +91,7 @@
       "hidden": false,
       "archived": false,
       "createdAt": "2025-01-05T09:00:00Z",
+      "hiddenAt": null,
       "tasks": [
         {
           "id": "t1",
@@ -84,7 +99,8 @@
           "status": "active",
           "priority": "high",
           "assignedTo": "2",
-          "estimateHours": 16
+          "estimateHours": 16,
+          "projectId": "p1"
         },
         {
           "id": "t2",
@@ -92,14 +108,16 @@
           "status": "overdue",
           "priority": "urgent",
           "assignedTo": "3",
-          "dueDate": "2025-01-14T18:00"
+          "dueDate": "2025-01-14T18:00",
+          "projectId": "p1"
         },
         {
           "id": "t3",
           "title": "Notifications Refactor",
           "status": "blocked",
           "priority": "medium",
-          "assignedTo": "7"
+          "assignedTo": "7",
+          "projectId": "p1"
         }
       ]
     },
@@ -227,6 +245,7 @@
       "hidden": false,
       "archived": false,
       "stoppedAt": "2025-01-10T09:00:00Z",
+      "hiddenAt": null,
       "tasks": [
         {
           "id": "1767446712401",
@@ -250,7 +269,8 @@
           "dueDate": "2026-01-04T15:25",
           "estimateHours": 24,
           "createdAt": "2026-01-03T13:25:12.419Z",
-          "updatedAt": "2026-01-03T13:25:12.420Z"
+          "updatedAt": "2026-01-03T13:25:12.420Z",
+          "projectId": "p5"
         }
       ]
     },
@@ -260,12 +280,13 @@
       "leaderId": "9",
       "members": [
         "7",
-        "9"
+        "9",
+        "1768644224740"
       ],
       "status": "active",
-      "hidden": false,
+      "hidden": true,
       "archived": false,
-      "hiddenAt": null,
+      "hiddenAt": "2026-02-03T11:16:45.905Z",
       "tasks": [
         {
           "id": "1767454098719",
@@ -291,8 +312,56 @@
           "createdAt": "2026-01-03T15:28:18.740Z",
           "updatedAt": "2026-01-03T15:28:18.740Z",
           "projectId": "p6"
+        },
+        {
+          "id": "1768825386465",
+          "title": "Test Taske",
+          "description": "fdsfgdsjuh89ihsdnfd",
+          "status": "active",
+          "priority": "urgent",
+          "assignedTo": "1768644224740",
+          "createdBy": "1",
+          "requirements": [
+            "fsdf"
+          ],
+          "acceptanceCriteria": [
+            "sdfsdf"
+          ],
+          "labels": [
+            "sdf"
+          ],
+          "blockerNote": null,
+          "startAt": "2026-01-19T14:22",
+          "dueDate": "2026-01-20T14:23",
+          "estimateHours": 24,
+          "createdAt": "2026-01-19T12:23:06.484Z",
+          "updatedAt": "2026-01-19T12:23:06.484Z",
+          "projectId": "p6"
         }
       ]
+    },
+    {
+      "id": "ddee",
+      "name": "New Project",
+      "description": "This is A Test Project",
+      "leaderId": 1,
+      "members": [
+        2,
+        4,
+        6,
+        1
+      ],
+      "status": "archived",
+      "startAt": "2026-02-04T07:00:00.000Z",
+      "dueAt": "2026-02-20T21:59:59.000Z",
+      "createdAt": "2026-02-04T11:00:59.980Z",
+      "createdBy": 1,
+      "previousStatus": "active",
+      "hidden": false,
+      "hiddenAt": null,
+      "archived": true,
+      "archivedAt": null,
+      "tasks": []
     }
   ],
   "BlokUsers": [],
@@ -754,6 +823,327 @@
       },
       "status": "unread",
       "createdAt": "2026-01-03T15:36:03.705Z"
+    },
+    {
+      "id": "qmKEUD",
+      "type": "user_login",
+      "title": "Welcome back, Mahmoud Ahmed!",
+      "message": "Mahmoud Ahmed logged in at 1/8/2026, 2:16:27 PM",
+      "fromUserId": null,
+      "toUserId": "1767874574947",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-08T12:16:27.530Z"
+    },
+    {
+      "id": "-LO69F",
+      "type": "user_login",
+      "title": "Welcome back, Mahmoud Ahmed!",
+      "message": "Mahmoud Ahmed logged in at 1/17/2026, 11:59:02 AM",
+      "fromUserId": null,
+      "toUserId": "1",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-17T09:59:02.609Z"
+    },
+    {
+      "id": "J6AhBl",
+      "type": "user_login",
+      "title": "Welcome back, ali ahmed!",
+      "message": "ali ahmed logged in at 1/17/2026, 12:04:27 PM",
+      "fromUserId": null,
+      "toUserId": "1768644224740",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-17T10:04:27.717Z"
+    },
+    {
+      "id": "LzwApJ",
+      "type": "user_login",
+      "title": "Welcome back, ali ahmed!",
+      "message": "ali ahmed logged in at 1/17/2026, 12:07:51 PM",
+      "fromUserId": null,
+      "toUserId": "1768644224740",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-17T10:07:51.382Z"
+    },
+    {
+      "id": "7w_beI",
+      "type": "user_login",
+      "title": "Welcome back, Mahmoud Ahmed!",
+      "message": "Mahmoud Ahmed logged in at 1/17/2026, 12:09:31 PM",
+      "fromUserId": null,
+      "toUserId": "1",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-17T10:09:31.966Z"
+    },
+    {
+      "id": "xzaYhj",
+      "type": "user_login",
+      "title": "Welcome back, ali ahmed!",
+      "message": "ali ahmed logged in at 1/17/2026, 12:10:38 PM",
+      "fromUserId": null,
+      "toUserId": "1768644224740",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-17T10:10:38.941Z"
+    },
+    {
+      "id": "DoMyaM",
+      "type": "user_login",
+      "title": "Welcome back, Mahmoud Ahmed!",
+      "message": "Mahmoud Ahmed logged in at 1/17/2026, 1:42:30 PM",
+      "fromUserId": null,
+      "toUserId": "1",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-17T11:42:30.745Z"
+    },
+    {
+      "id": "NtrT1f",
+      "type": "user_login",
+      "title": "Welcome back, ali ahmed!",
+      "message": "ali ahmed logged in at 1/17/2026, 1:53:40 PM",
+      "fromUserId": null,
+      "toUserId": "1768644224740",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-17T11:53:40.438Z"
+    },
+    {
+      "id": "XaVWSp",
+      "type": "user_login",
+      "title": "Welcome back, Mahmoud Ahmed!",
+      "message": "Mahmoud Ahmed logged in at 1/17/2026, 2:12:25 PM",
+      "fromUserId": null,
+      "toUserId": "1",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-17T12:12:25.692Z"
+    },
+    {
+      "id": "8lQRx9",
+      "type": "user_login",
+      "title": "Welcome back, Mahmoud Ahmed1!",
+      "message": "Mahmoud Ahmed1 logged in at 1/17/2026, 2:18:45 PM",
+      "fromUserId": null,
+      "toUserId": "1767874574947",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-17T12:18:45.615Z"
+    },
+    {
+      "id": "TsWr4o",
+      "type": "user_login",
+      "title": "Welcome back, ali ahmed!",
+      "message": "ali ahmed logged in at 1/17/2026, 2:19:20 PM",
+      "fromUserId": null,
+      "toUserId": "1768644224740",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-17T12:19:20.307Z"
+    },
+    {
+      "id": "hijC4T",
+      "type": "task_added team to p6",
+      "title": "New Task Added: Test Taske by Mahmoud Ahmed",
+      "message": "User 1 added a new task \"Test Taske\" to project \"Marketing Campaign\"",
+      "fromUserId": "1",
+      "toUserId": "7",
+      "projectId": "p6",
+      "taskId": "1768825386465",
+      "taskSnapshot": {
+        "id": "1768825386465",
+        "title": "Test Taske",
+        "description": "fdsfgdsjuh89ihsdnfd",
+        "status": "active",
+        "priority": "urgent",
+        "assignedTo": "1768644224740",
+        "createdBy": "1",
+        "requirements": [
+          "fsdf"
+        ],
+        "acceptanceCriteria": [
+          "sdfsdf"
+        ],
+        "labels": [
+          "sdf"
+        ],
+        "blockerNote": null,
+        "startAt": "2026-01-19T14:22",
+        "dueDate": "2026-01-20T14:23",
+        "estimateHours": 24,
+        "createdAt": "2026-01-19T12:23:06.484Z",
+        "updatedAt": "2026-01-19T12:23:06.484Z"
+      },
+      "meta": {
+        "phase": "added"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-19T12:23:06.494Z"
+    },
+    {
+      "id": "jKDGXA",
+      "type": "task_added team to p6",
+      "title": "New Task Added: Test Taske by Mahmoud Ahmed",
+      "message": "User 1 added a new task \"Test Taske\" to project \"Marketing Campaign\"",
+      "fromUserId": "1",
+      "toUserId": "9",
+      "projectId": "p6",
+      "taskId": "1768825386465",
+      "taskSnapshot": {
+        "id": "1768825386465",
+        "title": "Test Taske",
+        "description": "fdsfgdsjuh89ihsdnfd",
+        "status": "active",
+        "priority": "urgent",
+        "assignedTo": "1768644224740",
+        "createdBy": "1",
+        "requirements": [
+          "fsdf"
+        ],
+        "acceptanceCriteria": [
+          "sdfsdf"
+        ],
+        "labels": [
+          "sdf"
+        ],
+        "blockerNote": null,
+        "startAt": "2026-01-19T14:22",
+        "dueDate": "2026-01-20T14:23",
+        "estimateHours": 24,
+        "createdAt": "2026-01-19T12:23:06.484Z",
+        "updatedAt": "2026-01-19T12:23:06.484Z"
+      },
+      "meta": {
+        "phase": "added"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-19T12:23:06.593Z"
+    },
+    {
+      "id": "UhDWJU",
+      "type": "task_added team to p6",
+      "title": "New Task Added: Test Taske by Mahmoud Ahmed",
+      "message": "User 1 added a new task \"Test Taske\" to project \"Marketing Campaign\"",
+      "fromUserId": "1",
+      "toUserId": "1768644224740",
+      "projectId": "p6",
+      "taskId": "1768825386465",
+      "taskSnapshot": {
+        "id": "1768825386465",
+        "title": "Test Taske",
+        "description": "fdsfgdsjuh89ihsdnfd",
+        "status": "active",
+        "priority": "urgent",
+        "assignedTo": "1768644224740",
+        "createdBy": "1",
+        "requirements": [
+          "fsdf"
+        ],
+        "acceptanceCriteria": [
+          "sdfsdf"
+        ],
+        "labels": [
+          "sdf"
+        ],
+        "blockerNote": null,
+        "startAt": "2026-01-19T14:22",
+        "dueDate": "2026-01-20T14:23",
+        "estimateHours": 24,
+        "createdAt": "2026-01-19T12:23:06.484Z",
+        "updatedAt": "2026-01-19T12:23:06.484Z"
+      },
+      "meta": {
+        "phase": "added"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-19T12:23:06.636Z"
+    },
+    {
+      "id": "IkNJVh",
+      "type": "user_login",
+      "title": "Welcome back, Mahmoud Ahmed!",
+      "message": "Mahmoud Ahmed logged in at 1/21/2026, 5:14:49 PM",
+      "fromUserId": null,
+      "toUserId": "1",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-01-21T15:14:49.079Z"
     }
   ]
 }

@@ -15,6 +15,10 @@ export default function ViewProject() {
   const { loading } = useSelector((s) => s.projects || { loading: false });
   const user = useSelector((s) => s.auth?.user);
 
+  if (user.role !== "admin") {
+    return <div className="p-6">❌ Access Denied</div>;
+  }
+
   // memoize project selector if selectProjectById is a factory
   const selectProject = useMemo(() => {
     // selectProjectById could be factory: (id) => (state) => ...
@@ -39,6 +43,8 @@ export default function ViewProject() {
     navigate('/')
   }
 
+  console.log(user);
+  
   return (
     <div className="container mx-auto  px-6 py-8">
 

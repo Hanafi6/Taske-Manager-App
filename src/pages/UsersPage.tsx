@@ -12,7 +12,8 @@ export default function UsersPage() {
   }, [dispatch]);
 
   const handleAdd = () => {
-    dispatch(addUser({ name: "Mahmoud", role: "Developer" }));
+    // dispatch(addUser({ name: "Mahmoud", role: "Developer" }));
+    console.log(true)
   };
 
   if (loading) return <p>Loading...</p>;

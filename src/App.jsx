@@ -28,18 +28,68 @@ import Notifications from "./pages/Notifications.jsx";
 import { fetchUsers } from "./slices/AuthSlice.js";
 
 // RTK Query hooks (تأكد المسار صحيح)
-import { archiveProject, fetchProjects, hideProject, deletePermanentlyProject } from "./slices/projectsSlice.js";
+import { archiveProject, fetchProjects, hideProject, deletePermanentlyProject, AddUserToProject } from "./slices/projectsSlice";
 import { fetchNotifications } from "./slices/notificationsSlice.js";
-import { setOpenDiitailsDelete } from "./slices/Modals.js";
+import { setListOfUsers, setOpenDiitailsDelete } from "./slices/Modals.js";
 
 
+const ListOfUser = ({user}) => {
+  const users = useSelector(s => s.auth.usersList);
+  const dispatch = useDispatch();
+  const selectProject = useSelector(s => s.projects.selectProject) || null;
 
+  const CoiseUser = (user) => {
+    dispatch(AddUserToProject({ projectId: selectProject.id, userId: user.id }))
+    dispatch(setListOfUsers(false))
+  }
+  
+  return (
+    <motion.div
+      className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-40"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div
+        className="bg-white rounded-lg shadow-2xl p-6 w-100 max-w-2xl max-h-96 overflow-y-auto"
+        initial={{ scale: 0.8, opacity: 0, y: -20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.8, opacity: 0, y: -20 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      >
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">Users List</h2>
+        <button onClick={() => dispatch(setListOfUsers(false))} className="text-sm  text-white px-3 py-1 rounded hover:bg-red-600 transition">Close</button>
+        <div className="space-y-2 mt-4  flex items-center justify-center flex-col  w-full">
+          {users && users.length > 0 ? (  
+            users.filter(e => e.role == 'user' && e.id != user.id).map(user => (
+              <div key={user.id} className="p-3 border  border-gray-200 rounded-lg  hover:bg-black transition">
+                <h4 onClick={e => CoiseUser(user)} className="font-semibold text-center cursor-pointer hover:text-[#fff]  text-gray-900">{user.name}</h4>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-center py-8">No users available</p>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 const DitailsOfDelete = ({ project, list, onClose }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-
+useEffect(() => {
+    document.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      console.log(e)
+    });
+    console.log('mounted');
+    return () => {
+      document.removeEventListener('contextmenu', e => e.preventDefault());
+    };
+  }, []);
   return (
     <motion.div
       className="fixed inset-0 bg-[#757373] bg-opacity-40 flex items-center justify-center z-50"
@@ -110,6 +160,10 @@ export default function App() {
   const location = useLocation();
   const Project = useSelector((s) => s.projects.selectProject);
   const Tasks = useSelector(s => s.projects)
+  const ListOfUsers = useSelector(s => s.modals.ListOfUsers);
+  const user= useSelector(s => s.auth.user);
+
+
 
   const navigate = useNavigate();
   const OpenDatilsDeleteProject = useSelector((s) => s.modals.OpenDatilsDeleteProject);
@@ -149,6 +203,10 @@ export default function App() {
           }} />
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {ListOfUsers && <ListOfUser user={user} />}
+      </AnimatePresence>
       <NavBar />
 
       <main className="container mx-auto my-15 px-4 py-6">
@@ -179,6 +237,8 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+        
 
             <Route
               path="/dashboard"

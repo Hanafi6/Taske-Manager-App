@@ -1,18 +1,16 @@
-// pages/ProjectsPage.jsx
+ // pages/ProjectsPage.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import ProjectCard from '../components/ProjectCard';
 import { makeSelectALLProjectsForUser } from '../store/selectors';
 import { useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 
 const ProjectsPage = () => {
   const { list, loading } = useSelector((state) => state.projects);
   const { user, role } = useSelector((state) => state.auth);
 
    const location = useLocation();
-  
-  
+
       useEffect(() => {
         if (location.state?.scroll) {
           console.log(location.state?.scroll)
@@ -64,7 +62,6 @@ const ProjectsPage = () => {
 
   // console.log(scProj)
   if (loading) return <p className="p-4">Loading...</p>;
-
 
   return (
     <div className="w-full mx-auto p-4">

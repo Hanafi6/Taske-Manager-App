@@ -1,5 +1,5 @@
 // pages/TasksPage.tsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import TaskCard from "../components/TaskeCard";
 import { makeSelectTasks } from "../store/selectors";
@@ -13,14 +13,22 @@ const TasksPage: React.FC = () => {
     [user.id, role]
   );
 
+
+
+
   const { grouped, statuses } = useSelector((state) =>
     selectTasks(state)
   );
 
-  console.log(statuses, grouped,user.id);
 
   // 🔥 Active tab state
-  const [activeTab, setActiveTab] = useState( "done");
+  const [activeTab, setActiveTab] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (statuses.length > 0 && !activeTab) {
+      setActiveTab(statuses[0]);
+    }
+  }, [statuses, activeTab]);
 
   return (
     <div className="container mx-auto p-4 space-y-8">

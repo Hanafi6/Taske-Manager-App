@@ -2,7 +2,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { computeTaskTimeMeta, formatDuration, GetProjectById, GetTaskeById, selectUserId } from "../store/selectors";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setListOfUsers } from "../slices/Modals";
 
 const cls = {
   ring: (t, overdue) => {
@@ -40,6 +41,7 @@ export default function TaskCard({
   clickable = true,
 }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
 
   // ⏱️ نعمل state للوقت الحالي لتحديث العدّاد كل ثانية
@@ -87,15 +89,18 @@ export default function TaskCard({
           <div className="font-medium truncate">{task.title}</div>
           <span className={`text-xs px-2 py-0.5 rounded shrink-0 ${badge.cls}`}>{badge.text}</span>
         </div>
-
         {/* Meta row */}
         {!compact && (
           <div className="mt-1 text-sm text-gray-700 flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="capitalize">Status: {task.status}</span>
+            {/* <div onClick={_ => dispatch(setListOfUsers(true))
+            } className="p-1 text-xs text-red-500 border rounded capitalize duration-200 cursor-pointer hover:bg-red-500 hover:text-white font-bold">assine</div>
+             */}
             <span>• Priority: {task.priority || "—"}</span>
             {task.dueDate && <span>• Due: {new Date(task.dueDate).toLocaleString()}</span>}
             {/* {showAssignee && task.assignedTo != null && <span>• Assignee: { useSelector(s => GetTaskeById(s,task.assignedTo)).name }</span>} */}
             {showAssignee && task.assignedTo != null && <span>• To : { useSelector(s => selectUserId(task?.assignedTo,s.auth?.usersList))?.name}</span>}
+            
             {showProject && task.projectId != null && <span >• Project : <span onClick={e => navigate(`/project/${task.projectId}`)} className="duration-200 hover:bg-red-500 cursor-pointer p-1 rounded hover:font-bold hover:text-[#fff]">{useSelector(s =>GetProjectById(s,task.projectId))?.name}</span></span>}
           </div>
         )}

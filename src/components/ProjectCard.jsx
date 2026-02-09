@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CircleArrowOutDownLeft, Delete } from "lucide-react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import TaskCard from "../components/TaskeCard"; // تأكد من المسار والاسم
-import {  makeSelectTasksByProjectId } from "../store/selectors";
-import { setOpenDiitailsDelete } from "../slices/Modals";
+import { makeSelectTasksByProjectId } from "../store/selectors";
+import { setListOfUsers, setOpenDiitailsDelete, setContextMeneuDimention, setShowContextMeneu, setSelectElement } from "../slices/Modals";
 import { setSelectProject } from "../slices/projectsSlice";
 import ProjectSection from "../typs/TypsOfNavigates";
 
@@ -17,6 +17,7 @@ const prioRank = (p) => {
   const i = PRIORITY_ORDER.indexOf(lower(p));
   return i === -1 ? PRIORITY_ORDER.length : i;
 };
+
 const isOverdue = (t) => t?.dueDate && t.status !== "done" && new Date(t.dueDate) < new Date();
 const getTopPriorityInProject = (tasks = []) => {
   if (!tasks.length) return null;
@@ -24,6 +25,7 @@ const getTopPriorityInProject = (tasks = []) => {
     .map((t) => lower(t.priority))
     .sort((a, b) => prioRank(a) - prioRank(b))[0] || null;
 };
+
 const priorityChipCls = (p) => {
   const pr = lower(p);
   if (pr === "urgent") return "bg-red-100 text-red-700";
@@ -32,6 +34,7 @@ const priorityChipCls = (p) => {
   if (pr === "low") return "bg-gray-100 text-gray-700";
   return "bg-gray-100 text-gray-700";
 };
+
 const sortTasksByPriority = (a, b) => {
   const pa = prioRank(a.priority), pb = prioRank(b.priority);
   if (pa !== pb) return pa - pb;
@@ -40,28 +43,38 @@ const sortTasksByPriority = (a, b) => {
   return da - db;
 };
 
-function projectBadge(project, tasks) {
+function projectBadge(project, tasks, isSelected = false) {
   const allDone = tasks.length > 0 && tasks.every((t) => t.status === "done");
   const hasUrgentOrHigh = tasks.some((t) => ["urgent", "high"].includes(lower(t.priority)));
   const hasOverdue = tasks.some((t) => isOverdue(t));
 
+  if (isSelected) {
+    return {
+      ring: "ring-yellow-400",
+      bg: "bg-yellow-50",
+      badge: "Selected",
+      badgeCls: "bg-blue-100 text-blue-700",
+    };
+  }
+
   if (allDone || ["completed", "done"].includes(lower(project?.status))) {
     return { ring: "ring-green-400", bg: "bg-green-50", badge: "Completed", badgeCls: "bg-green-100 text-green-700" };
   }
+
   if (hasUrgentOrHigh || hasOverdue) {
     return { ring: "ring-red-400", bg: "bg-red-50", badge: hasOverdue ? "Overdue" : "Important", badgeCls: "bg-red-100 text-red-700" };
   }
+
   if (lower(project?.status) === "active") {
     return { ring: "ring-sky-400", bg: "bg-sky-50", badge: "Active", badgeCls: "bg-sky-100 text-sky-700" };
   }
-  // if (lower(project?.status) === "Archived") {
-  //   return { ring: "ring-[#777]", bg: "bg--[#777]", badge: "Active", badgeCls: "bg--[#777] text--[#777]" };
-  // }
+
+  if (lower(project?.status) === "block" || lower(project?.status) === "blocked") {
+    return { ring: "ring-gray-500", bg: "bg-gray-100", badge: "Blocked", badgeCls: "bg-gray-300 text-gray-800" };
+  }
+
   return { ring: "ring-gray-300", bg: "bg-gray-50", badge: "Idle", badgeCls: "bg-gray-100 text-gray-700" };
 }
-
-
-
 
 export default function ProjectCard({
   project,
@@ -76,7 +89,8 @@ export default function ProjectCard({
   mineTaskes = false,
   CreateTaskeBtn = false,
   deletePro,
-  hidden = false
+  hidden = false,
+  onClickContext = () => { }
 }) {
   const navigate = useNavigate();
   const { role } = useSelector((s) => s.auth || {});
@@ -84,11 +98,15 @@ export default function ProjectCard({
   const { tasks: allFlatTasks = [] } = useSelector((s) => s.projects || { tasks: [] });
   const dispach = useDispatch();
 
+  const { ContextMeneuDimention, ShowContextMeneu, SelectElement } = useSelector((s) => s.modals || {});
+  const isSelected = SelectElement?.id === project?.id;
+
   // --- Normalize IDs and inputs to avoid type-mismatch bugs ---
   const projId = project?.id;
   const numericCurrentUserId = currentUserId != null ? Number(currentUserId) : null;
 
   let tasks = []
+
 
 
   if (!mineTaskes) {
@@ -102,8 +120,10 @@ export default function ProjectCard({
     tasks = useSelector(ts);
   }
 
-  const pc = projectBadge(project || {}, tasks);
 
+
+  // دلوقتي نجيب التنسيقات بناءً على الاختيار
+  const pc = projectBadge(project, tasks, isSelected);
   const stats = showStats
     ? {
       total: tasks.length,
@@ -147,18 +167,18 @@ export default function ProjectCard({
             </Link>
           )}
           {Array.isArray(project?.members) && (
-            <span className="text-xs px-2 py-1 rounded bg-gray-100">
+            <motion.span className="text-xs px-2 py-1 rounded bg-gray-100">
               Members: {project.members.length}
-            </span>
+            </motion.span>
           )}
           {project?.createdAt && (
-            <span className="text-xs px-2 py-1 rounded bg-gray-100">
+            <motion.span className="text-xs px-2 py-1 rounded bg-gray-100">
               Created: {new Date(project.createdAt).toLocaleDateString()}
-            </span>
+            </motion.span>
           )}
-          <span className={`text-xs px-2 py-1 rounded ${priorityChipCls(topPrio)}`}>
+          <motion.span className={`text-xs px-2 py-1 rounded ${priorityChipCls(topPrio)}`}>
             Top prio: {topPrio || "—"}
-          </span>
+          </motion.span>
         </>
       )}
 
@@ -193,17 +213,17 @@ export default function ProjectCard({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -40, scale: 0.95 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
-                  key={t.id}
+                key={t.id}
               >
                 <TaskCard
                   task={t}
                   showAssignee={mode === "all"}
                   showProject={false}
-                  // clickable
+                // clickable
                 />
               </motion.div>
             ))}
-         </AnimatePresence>
+          </AnimatePresence>
         </ul>
       ) : (
         <div className="p-3 rounded border border-dashed text-gray-600">
@@ -213,8 +233,14 @@ export default function ProjectCard({
     </div>
   );
 
+  // function DBClick() {
+
+  // }
+
+
   return (
-    <li className={`rounded-lg border border-gray-200 ring-2 ${pc.ring} overflow-hidden ${hidden && 'bg-gray-300'}`}>
+    <motion.li onContextMenu={e => onClickContext(e, project)} className={`rounded-lg  border border-gray-200 ring-2 ${pc.ring} overflow-hidden ${hidden && 'bg-gray-300   '} `}>
+
       <div className={`w-full px-4 py-3 ${pc.bg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -223,11 +249,10 @@ export default function ProjectCard({
                 className={`text-left text-lg md:text-xl font-semibold truncate
   ${hidden ? 'line-through text-gray-400 cursor-not-allowed ' : 'hover:underline cursor-pointer'}
 `}
-                onClick={() => !hidden && navigate(`/projects/${project.id}`)}
+                onClick={() => !hidden && clickableTitle && navigate(`/projects/${project.id}`)}
 
               >
                 {project.name}
-
               </button>
               {hidden &&
                 // if You Clicked On It Will Rotion You To Hiddens Pages
@@ -237,6 +262,7 @@ export default function ProjectCard({
                   }}
                   className="text-[#444] font-bold rounded p-1 bg-[#1f1f1f] duration-200 hover:text-[#fff] hover:bg-[#444] cursor-pointer "> Hided</div>
               }
+
 
               <span onClick={_ => {
                 project.status == 'completed' && navigate('/dashboard', { state: { scroll: { id: projId, sec: ProjectSection.ARCHIVED } } })
@@ -256,14 +282,18 @@ export default function ProjectCard({
                   <div
                     onClick={_ => {
                       // deletePro(project)
-
                       dispach(setOpenDiitailsDelete(true));
-                      
-                        
                       dispach(setSelectProject(project));
                     }}
                     className=" p-1 bg-red-500 rounded font-bold text-[#fff] capitalize cursor-pointer duration-200 hover:bg-red-700 select-none">Delete</div>
-
+                  <div
+                    className="hover:bg-red-500 hover:text-[#fff] border-red-400 border rounded p-1 font-bold
+               duration-200 text-red-500 cursor-pointer"
+                    onClick={e => {
+                      dispach(setSelectProject(project))
+                      dispach(setListOfUsers(true))
+                    }}
+                  >Assign</div>
                 </>
               )}
             </div>
@@ -307,7 +337,7 @@ export default function ProjectCard({
           Content
         )
       }
-
-    </li >
+    </motion.li >
   );
 }
+
