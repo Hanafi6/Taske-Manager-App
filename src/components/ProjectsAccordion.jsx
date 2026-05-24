@@ -1,15 +1,12 @@
 // components/ProjectsAccordionUnified.jsx
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import ProjectCard from "./ProjectCard"; // ✅ بدل TaskeCard/TaskCard
 import { makeSelectTasksByProjectId, selectProjectById } from "../store/selectors";
 import { AnimatePresence, motion } from "framer-motion";
 import { setListOfUsers, setOpenDiitailsDelete, setContextMeneuDimention, setShowContextMeneu, setSelectElement } from "../slices/Modals";
 import GlobalContextMenu from "./ContextMenesu";
 
-
-
-
+import { useAppSelector, useAppDispatch } from "../store/Hooks";
 
 const SloutOut = ({ projects }) => {
   const link = 'bg-[#555] hover:bg-[#38159f] duration-200 cursor-pointer p-1 rounded text-[#fff] font-bold active:text-red-100 select-none'
@@ -97,25 +94,25 @@ const SloutOut = ({ projects }) => {
 
 export default function ProjectsAccordionUnified({ mode = "auto" }) {
   const { list: projects = [], projectsLoading: loading } =
-    useSelector((s) => s.projects || { list: [], projectsLoading: false });
+    useAppSelector((s) => s.projects || { list: [], projectsLoading: false });
   // const [OpenDatilsDelete, setOpenDiitailsDelete] = React.useState(false);
 
 
-  const dispach = useDispatch();
+  const dispach = useAppDispatch();
 
-  const { ContextMeneuDimention, ShowContextMeneu, SelectElement } = useSelector((s) => s.modals || {});
+  const { ContextMeneuDimention, ShowContextMeneu, SelectElement } = useAppSelector((s) => s.modals || {});
 
 
-  const user = useSelector((s) => s.auth?.user);
+  const user = useAppSelector((s) => s.auth?.user);
   const uid = Number(user?.id);
   const role = user?.role || "user";
 
   // حسم المود تلقائيًا حسب الدور
   const resolvedMode = mode === "auto" ? (role === "admin" ? "all" : "mine") : mode;
 
-  // const project = useSelector(selectProjectById(id));
+  // const project = useAppSelector (selectProjectById(id));
 
-  // const tasks = useSelector((s) => makeSelectTasksByProjectId(id)(s));
+  // const tasks = useAppSelector ((s) => makeSelectTasksByProjectId(id)(s));
 
   // فلترة المشاريع لو mode = mine
   const filteredProjects =
@@ -123,33 +120,31 @@ export default function ProjectsAccordionUnified({ mode = "auto" }) {
       ? projects
       : projects.filter((p) => p.leaderId == Number(uid) || p.members?.includes(`${uid}`));
 
+  function Context(e, project) {
+    e.preventDefault();
+    // console.log(e.target)
 
+    const isSelected =
+      SelectElement?.id === project?.id;
 
+    // نفس المشروع → اقفل
+    if (isSelected) {
+      dispach(setShowContextMeneu(false));
+      dispach(setSelectElement(null));
+      return;
+    }
 
-function Context(e, project) {
-  e.preventDefault();
+    // مشروع جديد
+    dispach(
+      setContextMeneuDimention({
+        top: e.clientY,
+        left: e.clientX,
+      })
+    );
 
-  const isSelected =
-    SelectElement?.id === project?.id;
-
-  // نفس المشروع → اقفل
-  if (isSelected) {
-    dispach(setShowContextMeneu(false));
-    dispach(setSelectElement(null));
-    return;
+    dispach(setSelectElement(project));
+    dispach(setShowContextMeneu(true));
   }
-
-  // مشروع جديد
-  dispach(
-    setContextMeneuDimention({
-      top: e.clientY,
-      left: e.clientX,
-    })
-  );
-
-  dispach(setSelectElement(project));
-  dispach(setShowContextMeneu(true));
-}
 
   if (loading) return <Skeleton />;
 
@@ -170,7 +165,7 @@ function Context(e, project) {
             showMeta
             hidden={p.hidden ? true : false}
             clickableTitle={p?.hidden ? false : true}
-            onClickContext={e => Context(e,p)}
+            onClickContext={e => Context(e, p)}
           />
         )) : <SloutOut projects={projects} />
       }

@@ -11,55 +11,64 @@
       "id": "2",
       "name": "Sara Ali",
       "email": "sara@company.com",
-      "role": "user"
+      "role": "user",
+      "password": "dsdsdsdsdsdsdsd"
     },
     {
       "id": "3",
       "name": "Omar Hassan",
       "email": "omar@company.com",
-      "role": "user"
+      "role": "user",
+      "password": "omar_hassan"
     },
     {
       "id": "4",
       "name": "Aya Mansour",
       "email": "aya@company.com",
-      "role": "user"
+      "role": "user",
+      "password": "aya_mansour"
     },
     {
       "id": "5",
       "name": "Mostafa Sabry",
       "email": "mostafa@company.com",
-      "role": "admin"
+      "role": "admin",
+      "password": "mostafa_sabry"
     },
     {
       "id": "6",
       "name": "Karim Nabil",
       "email": "karim@company.com",
-      "role": "user"
+      "role": "user",
+      "password": "karim_nabil"
     },
     {
       "id": "7",
       "name": "Nour Adel",
       "email": "nour@company.com",
-      "role": "user"
+      "role": "user",
+      "password": "nour_adel"
     },
     {
       "id": "8",
       "name": "Hassan Fathy",
       "email": "hassan@company.com",
-      "role": "user"
+      "role": "user",
+      "password": "hassan_fathy"
     },
     {
       "id": "9",
       "name": "Reem Youssef",
       "email": "reem@company.com",
-      "role": "user"
+      "role": "user",
+      "password": "reem_youssef"
     },
     {
       "id": "10",
       "name": "Youssef Magdy",
       "email": "youssef@company.com",
-      "role": "user"
+      "role": "user",
+      "password": "youssef_magdy"
     },
     {
       "id": "1767874574947",
@@ -92,6 +101,7 @@
       "archived": false,
       "createdAt": "2025-01-05T09:00:00Z",
       "hiddenAt": null,
+      "previousStatus": null,
       "tasks": [
         {
           "id": "t1",
@@ -131,16 +141,19 @@
         "6",
         "9"
       ],
-      "status": "active",
-      "hidden": false,
+      "status": "hidden",
+      "hidden": true,
       "archived": false,
+      "previousStatus": "active",
+      "hiddenAt": "2026-05-23T23:12:44.424Z",
       "tasks": [
         {
           "id": "t4",
           "title": "Upload System",
           "status": "done",
           "priority": "medium",
-          "assignedTo": "6"
+          "assignedTo": "6",
+          "projectId": "p2"
         },
         {
           "id": "1767454563530",
@@ -164,7 +177,8 @@
           "dueDate": "2026-01-04T17:35",
           "estimateHours": 24,
           "createdAt": "2026-01-03T15:36:03.548Z",
-          "updatedAt": "2026-01-03T15:36:03.548Z"
+          "updatedAt": "2026-01-03T15:36:03.548Z",
+          "projectId": "p2"
         }
       ]
     },
@@ -181,6 +195,7 @@
       "archivedAt": "2026-01-03T14:53:17.385Z",
       "archived": false,
       "hiddenAt": null,
+      "previousStatus": null,
       "tasks": [
         {
           "id": "1767451981755",
@@ -212,26 +227,13 @@
         "3",
         "5"
       ],
-      "status": "active",
+      "status": "archived",
       "hidden": false,
-      "archived": false,
+      "archived": true,
       "hiddenAt": null,
-      "tasks": [
-        {
-          "id": "t7",
-          "title": "Audit API Access",
-          "status": "active",
-          "assignedTo": "3",
-          "projectId": "p4"
-        },
-        {
-          "id": "t8",
-          "title": "Rotate Secrets",
-          "status": "pending",
-          "assignedTo": "5",
-          "projectId": "p4"
-        }
-      ]
+      "previousStatus": "archived",
+      "archivedAt": null,
+      "tasks": []
     },
     {
       "id": "p5",
@@ -246,6 +248,7 @@
       "archived": false,
       "stoppedAt": "2025-01-10T09:00:00Z",
       "hiddenAt": null,
+      "previousStatus": null,
       "tasks": [
         {
           "id": "1767446712401",
@@ -283,10 +286,10 @@
         "9",
         "1768644224740"
       ],
-      "status": "active",
-      "hidden": true,
+      "hidden": false,
       "archived": false,
-      "hiddenAt": "2026-02-03T11:16:45.905Z",
+      "hiddenAt": null,
+      "previousStatus": null,
       "tasks": [
         {
           "id": "1767454098719",
@@ -356,12 +359,33 @@
       "dueAt": "2026-02-20T21:59:59.000Z",
       "createdAt": "2026-02-04T11:00:59.980Z",
       "createdBy": 1,
-      "previousStatus": "active",
+      "previousStatus": "archived",
       "hidden": false,
       "hiddenAt": null,
       "archived": true,
       "archivedAt": null,
-      "tasks": []
+      "tasks": [
+        {
+          "id": "1779581507598",
+          "title": "Test Taske",
+          "description": "fskdjfopgpd[sfl,gmweiosd",
+          "status": "done",
+          "priority": "urgent",
+          "assignedTo": "1",
+          "createdBy": "1",
+          "requirements": [],
+          "acceptanceCriteria": [],
+          "labels": [],
+          "blockerNote": null,
+          "startAt": "2026-05-24T03:11",
+          "dueDate": "2026-05-26T03:11",
+          "estimateHours": 48,
+          "createdAt": "2026-05-24T00:11:47.626Z",
+          "updatedAt": "2026-05-24T11:39:06.550Z",
+          "completed": true,
+          "projectId": "ddee"
+        }
+      ]
     }
   ],
   "BlokUsers": [],
@@ -1144,6 +1168,23 @@
       },
       "status": "unread",
       "createdAt": "2026-01-21T15:14:49.079Z"
+    },
+    {
+      "id": "EALhIS",
+      "type": "user_login",
+      "title": "Welcome back, Mahmoud Ahmed!",
+      "message": "Mahmoud Ahmed logged in at 2/12/2026, 9:20:11 PM",
+      "fromUserId": null,
+      "toUserId": "1",
+      "projectId": null,
+      "taskId": null,
+      "taskSnapshot": null,
+      "meta": {
+        "source": "auth-listener",
+        "event": "login"
+      },
+      "status": "unread",
+      "createdAt": "2026-02-12T19:20:11.170Z"
     }
   ]
 }

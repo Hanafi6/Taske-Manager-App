@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchUsers } from "../slices/usersSlice";
-import { loginUser } from "../slices/AuthSlice";
-import { LogIn } from 'lucide-react'
+import { LogIn } from "../slices/AuthSlice";
+import { LogIn as LogInIcon } from 'lucide-react'
+
+import { useAppSelector, useAppDispatch } from "../store/Hooks";
 
 function Login() {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const { list } = useSelector((state) => state.users);
-    const { user, authLoading } = useSelector((state) => state.auth);
+    const { list } = useAppSelector((state) => state.users);
+    const { user, authLoading } = useAppSelector((state) => state.auth);
 
     // form: identifier = email OR name
     const [formData, setFormData] = useState({ identifier: "", password: "" });
@@ -28,7 +29,7 @@ function Login() {
         }
 
 
-        dispatch(loginUser(formData))
+        dispatch(LogIn(formData))
             .unwrap()
             .then((res) => {
                 navigate("/");
@@ -90,7 +91,7 @@ function Login() {
                     type="submit"
                     className="w-full flex justify-evenly items-center bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 transition"
                 >
-                    {!authLoading ? <> LogIn <LogIn /></> : <div>...loged In</div>}
+                    {!authLoading ? <> LogIn <LogInIcon /></> : <div>...loged In</div>}
                 </button>
 
                 <p className="text-sm text-gray-500 text-center">

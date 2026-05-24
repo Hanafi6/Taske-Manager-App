@@ -1,26 +1,92 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { deleteData, getData, postData, updateData } from "../api/api";
-import { useSelector } from "react-redux";
+
+// ----------------------------------------------------------------------
+// 1️⃣ تعاريف الـ Interfaces والـ Types (المهمة جداً للـ TypeScript)
+// ----------------------------------------------------------------------
+
+export interface DeleteRequest {
+  userId: string | number;
+  requestedAt: string;
+  snapshot: Task;
+}
+
+export interface Task {
+  id: string | number;
+  projectId?: string | number;
+  title?: string;
+  description?: string;
+  status?: string;
+  priority?: string;
+  assignedTo?: string | number;
+  completed?: boolean;
+  dueDate?: string;
+  startAt?: string;
+  endAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  collaborators?: Array<string | number>;
+  deleteRequest?: DeleteRequest | null;
+  [key: string]: unknown;
+}
+
+export interface Project {
+  id: string | number;
+  name: string;
+  status: 'active' | 'stopped' | 'archived' | 'hidden' | string;
+  previousStatus?: string | null;
+  archived?: boolean;
+  archivedAt?: string | null;
+  hidden?: boolean;
+  hiddenAt?: string | null;
+  deleted?: boolean;
+  deletedAt?: string | null;
+  tasks?: Task[];
+  members?: string[];
+  [key: string]: any;
+}
+
+export interface ProjectsState {
+  list: Project[];
+  tasks: Task[];
+  loading: boolean;
+  loadingSome: boolean;
+  error: string | null;
+  selectProject: Project | null;
+}
+
+// الـ Type الخاص بالـ RootState عشان الـ getState() جوه الـ thunks يشوف الـ state صح
+interface RootState {
+  projects: ProjectsState;
+  [key: string]: any;
+}
 
 // 🧩 helper: تطبيع الأخطاء
-const normalizeError = (err) => {
+const normalizeError = (err: any): string => {
   if (typeof err === "string") return err;
   if (err?.response?.data?.message) return err.response.data.message;
   if (err?.message) return err.message;
   return "Something went wrong";
 };
 
+// ----------------------------------------------------------------------
+// 2️⃣ الـ Async Thunks (مع تحديد أنواع الـ Arguments والـ Return والـ Reject)
+// ----------------------------------------------------------------------
+
 // 🟦 Request Delete Task (طلب حذف تاسك)
-export const requestDeleteTask = createAsyncThunk(
+export const requestDeleteTask = createAsyncThunk<
+  { projectId: string | number; taskId: string | number; userId: string | number; updatedProject: any; taskSnapshot: Task },
+  { projectId: string | number; taskId: string | number; userId: string | number },
+  { rejectValue: string }
+>(
   "projects/requestDeleteTask",
   async ({ projectId, taskId, userId }, { rejectWithValue }) => {
     try {
-      const project = await getData(`projects/${projectId}`);
+      const project: Project = await getData(`projects/${projectId}`);
       if (!project) throw new Error("Project not found");
       const task = (project.tasks || []).find(t => String(t.id) === String(taskId));
       if (!task) throw new Error("Task not found");
 
-      // snapshot of task to include in notification/logs
       const taskSnapshot = { ...task };
 
       const updatedTasks = (project.tasks || []).map((t) =>
@@ -34,21 +100,23 @@ export const requestDeleteTask = createAsyncThunk(
       if (!saved.ok) throw new Error("Failed to send delete request");
       const data = await saved.json();
 
-      // return snapshot as part of result/meta
       return { projectId, taskId, userId, updatedProject: data, taskSnapshot };
-    } catch (err) {
+    } catch (err: any) {
       return rejectWithValue(err.message || "Failed to request delete task");
     }
   }
 );
 
-
 // 🟦 Confirm Delete Task (موافقة أو رفض الحذف)
-export const confirmDeleteTask = createAsyncThunk(
+export const confirmDeleteTask = createAsyncThunk<
+  { projectId: string | number; taskId: string | number; approverId: string | number; approve: boolean; deleted: boolean; updatedProject: any; taskSnapshot: Task | null; Abrov: any },
+  { projectId: string | number; taskId: string | number; approverId: string | number; approve: boolean; Abrov: any },
+  { rejectValue: string }
+>(
   "projects/confirmDeleteTask",
   async ({ projectId, taskId, approverId, approve, Abrov }, { rejectWithValue }) => {
     try {
-      const project = await getData(`projects/${projectId}`);
+      const project: Project = await getData(`projects/${projectId}`);
       if (!project) throw new Error("Project not found");
 
       const task = (project.tasks || []).find(t => String(t.id) === String(taskId));
@@ -83,94 +151,61 @@ export const confirmDeleteTask = createAsyncThunk(
         taskSnapshot: snapshot,
         Abrov
       };
-    } catch (err) {
+    } catch (err: any) {
       return rejectWithValue(err.message || "Failed to confirm delete task");
     }
   }
 );
 
-
-// export const DeleteProject = createAsyncThunk(
-//   "projects/DeleteProject",
-//   async (project, { rejectWithValue }) => {
-//     try {
-//       if (!project) throw new Error("Invalid project");
-
-//       const projectId = project.id;
-
-//       // 1️⃣ نعدّل المشروع: نخليه deleted + ممكن نحط deletedAt
-//       const updatedProject = {
-//         ...project,
-//         deleted: true,
-//         deletedAt: new Date().toISOString(),
-//       };
-
-//       // ده بيرجع الـ project بعد التعديل من الـ API (res.json)
-//       const projectRes = await updateData("projects", projectId, updatedProject);
-//       const ProJectInAcrchive = await postData("archeivePorjects", updatedProject);
-//       // archeivePorjects
-
-
-
-//       return { projectId, archivedProject: projectRes };
-//     } catch (err) {
-//       console.error("DeleteProject error:", err);
-//       return rejectWithValue(err.message || "Failed to delete project");
-//     }
-//   }
-// );
-
-
-
-// 🟦 Fetch Projects
-
-// 🟦 Archive Project (بدل DeleteProject) بص انتا هنا هتعدل 
-
-export const archiveProject = createAsyncThunk(
+// 🟦 Archive Project 
+export const archiveProject = createAsyncThunk<
+  any,
+  Project,
+  { state: RootState; rejectValue: string }
+>(
   "projects/toggleArchiveProject",
   async (project, { rejectWithValue, getState }) => {
     try {
       if (!project?.id) throw new Error("Invalid project");
 
       const { tasks } = getState().projects;
-      // كل التاسكات الخاصة بالمشروع
-      const projectTasks = tasks.filter(
-        t => t.projectId === project.id
-      );
+      const projectTasks = tasks.filter(t => t.projectId === project.id);
 
       const updated = {
         ...project,
         previousStatus: project.status,
         status: "archived",
-        archived: true, // 👈 flag
+        archived: true,
         archivedAt: !project.archived ? new Date().toISOString() : null,
         tasks: projectTasks,
       };
       const saved = await updateData("projects", project.id, updated);
-      return saved;
-    } catch (err) {
+
+      // انتبه هنا: كودك الأصلي بيرجع الـ response بتاع الـ updateData علطول
+      // وضفت projectId في الـ payload المرجعة في الـ extraReducers تحسباً للـ اللوجيك بتاع الفلترة
+      return { projectId: project.id, savedProject: saved };
+    } catch (err: any) {
       return rejectWithValue(err.message || "Failed to toggle archive project");
     }
   }
 );
-// شوف انتا كنت بتعمل ايه في الأرشيف و الان ارشيف
 
 // 🟦 UnArchive Project (رجوع من الأرشيف)
-export const unArchiveProject = createAsyncThunk(
+export const unArchiveProject = createAsyncThunk<
+  { projectId: string | number; updatedProject: any },
+  Project,
+  { state: RootState; rejectValue: string }
+>(
   "projects/unArchiveProject",
   async (project, { rejectWithValue, getState }) => {
     try {
-      if (!project) throw new Error("Invalid project");
+      if (!project?.id) throw new Error("Invalid project");
       const { tasks } = getState().projects;
-      // كل التاسكات الخاصة بالمشروع
-      const projectTasks = tasks.filter(
-        t => t.projectId === project.id
-      );
+      const projectTasks = tasks.filter(t => t.projectId === project.id);
 
       const updated = {
         ...project,
         previousStatus: project.status,
-
         deleted: false,
         deletedAt: null,
       };
@@ -179,74 +214,63 @@ export const unArchiveProject = createAsyncThunk(
       await deleteData("archeivePorjects", project.id);
 
       return { projectId: project.id, updatedProject: saved };
-    } catch (err) {
+    } catch (err: any) {
       return rejectWithValue(err.message || "Failed to unarchive project");
     }
   }
 );
 
-// ☠️ Delete Permanently Project
-export const deletePermanentlyProject = createAsyncThunk(
+// ☠️ Delete Permanently Project (لاحظ هنا إن الـ payload بيكون الـ projectId وممكن يتبعت كـ object أو string)
+export const deletePermanentlyProject = createAsyncThunk<
+  { projectId: any },
+  any,
+  { rejectValue: string }
+>(
   "projects/deletePermanently",
   async (projectId, { rejectWithValue }) => {
     try {
       if (!projectId) throw new Error("ProjectId is required");
 
-      console.log(projectId)
+      // هنا كودك بيتعامل مع projectId على أساس إنه object جواه id: projectId.id
+      const actualId = projectId?.id ? projectId.id : projectId;
 
-      // 🧨 احذف من المشاريع الأساسية
-      const respons = await deleteData("projects", projectId.id);
-      const res = await getData("projects", projectId.id);
+      await deleteData("projects", actualId);
+      await getData("projects");
 
-      // 🧹 احذف من الأرشيف لو موجود
       try {
-        await deleteData("archeivePorjects", projectId.id);
+        await deleteData("archeivePorjects", actualId);
       } catch (e) {
-        // مش مشكلة لو مش موجود
-        console.log(e)
+        console.log(e);
       }
 
-      console.log(res)
-      console.log(respons)
-
       return { projectId };
-    } catch (err) {
-      return rejectWithValue(
-        err.message || "Failed to delete project permanently"
-      );
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to delete project permanently");
     }
   }
 );
 
-
-
-
-
 // 🟦 Stop Project
-export const stopProject = createAsyncThunk(
+export const stopProject = createAsyncThunk<any, Project, { rejectValue: string }>(
   "projects/stopProject",
   async (project, { rejectWithValue }) => {
     try {
       const updated = { ...project, status: "stopped" };
       const saved = await updateData("projects", project.id, updated);
       return saved;
-    } catch (err) {
+    } catch (err: any) {
       return rejectWithValue(err.message || "Failed to stop project");
     }
   }
 );
 
 // 🟦 Toggle Hide / Show Project
-export const hideProject = createAsyncThunk(
+export const hideProject = createAsyncThunk<any, Project, { state: RootState; rejectValue: string }>(
   "projects/toggleProjectHidden",
   async (project, { rejectWithValue, getState }) => {
     try {
       const { tasks } = getState().projects;
-
-      // كل التاسكات الخاصة بالمشروع
-      const projectTasks = tasks.filter(
-        t => t.projectId === project.id
-      );
+      const projectTasks = tasks.filter(t => t.projectId === project.id);
 
       const isHidden = project.hidden === true;
 
@@ -259,30 +283,23 @@ export const hideProject = createAsyncThunk(
         tasks: projectTasks,
       };
 
-      const saved = await updateData(
-        "projects",
-        project.id,
-        updatedProject
-      );
-
+      const saved = await updateData("projects", project.id, updatedProject);
       return saved;
-    } catch (err) {
-      return rejectWithValue(
-        err.message || "Failed to toggle project hidden"
-      );
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to toggle project hidden");
     }
   }
 );
 
-
-export const fetchProjects = createAsyncThunk(
+// 🟦 Fetch Projects
+export const fetchProjects = createAsyncThunk<{ projects: Project[]; tasks: Task[] }, void, { rejectValue: string }>(
   "projects/fetch",
   async (_, { rejectWithValue }) => {
     try {
-      const raw = (await getData("projects")) || [];
+      const raw: any[] = (await getData("projects")) || [];
       const projects = raw.map(({ tasks = [], ...p }) => p);
       const tasks = raw.flatMap((p) =>
-        (p.tasks || []).map((t) => ({ ...t, projectId: p.id }))
+        (p.tasks || []).map((t: any) => ({ ...t, projectId: p.id }))
       );
       return { projects, tasks };
     } catch (e) {
@@ -292,15 +309,13 @@ export const fetchProjects = createAsyncThunk(
 );
 
 // 🟦 Add Project
-export const addProject = createAsyncThunk(
+export const addProject = createAsyncThunk<any, { name: string;[key: string]: any }, { rejectValue: string }>(
   "projects/add",
   async (payload, { rejectWithValue }) => {
-    console.log(payload)
     try {
       if (!payload.name) return rejectWithValue("Project name is required");
       const created = await postData("projects", payload);
-      if (!created || !created.id)
-        return rejectWithValue("Server did not return created project");
+      if (!created || !created.id) return rejectWithValue("Server did not return created project");
       return created;
     } catch (e) {
       return rejectWithValue(normalizeError(e));
@@ -309,16 +324,20 @@ export const addProject = createAsyncThunk(
 );
 
 // 🟦 Add Task
-export const addTask = createAsyncThunk(
+export const addTask = createAsyncThunk<
+  { projectId: string | number; task: Task; updatedProject: any },
+  { projectId: string | number; task: Partial<Task> },
+  { rejectValue: string }
+>(
   "projects/addTask",
   async ({ projectId, task }, { rejectWithValue }) => {
     try {
       if (!projectId || !task) throw new Error("ProjectId and Task required");
 
-      const project = await getData(`projects/${projectId}`);
+      const project: Project = await getData(`projects/${projectId}`);
       if (!project) throw new Error("Project not found");
 
-      const newTask = {
+      const newTask: Task = {
         ...task,
         id: task.id || Date.now().toString(),
         createdAt: new Date().toISOString(),
@@ -330,99 +349,139 @@ export const addTask = createAsyncThunk(
         tasks: [...(project.tasks || []), newTask],
       };
 
-      // مش fetch Response
       const saved = await updateData("projects", projectId, updatedProject);
-
-      // هنا مش محتاج saved.ok ولا saved.json()
       return { projectId, task: newTask, updatedProject: saved };
-
-    } catch (err) {
-      return rejectWithValue(
-        err.message || "Failed to add task. Please try again."
-      );
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to add task. Please try again.");
     }
   }
 );
 
+// 🟦 Toggle task complete (checkbox)
+export const toggleTaskComplete = createAsyncThunk<
+  { projectId: string | number; task: Task; updatedProject: Project },
+  {
+    projectId: string | number;
+    taskId: string | number;
+    completed: boolean;
+    userId: string | number;
+  },
+  { rejectValue: string }
+>(
+  "projects/toggleTaskComplete",
+  async ({ projectId, taskId, completed, userId }, { rejectWithValue }) => {
+    try {
+      const project: Project = await getData(`projects/${projectId}`);
+      if (!project) throw new Error("Project not found");
 
-export const AddUserToProject = createAsyncThunk(
+      const existing = (project.tasks || []).find(
+        (t) => String(t.id) === String(taskId)
+      );
+      if (!existing) throw new Error("Task not found");
+
+      if (
+        existing.assignedTo == null ||
+        String(existing.assignedTo) !== String(userId)
+      ) {
+        throw new Error("Only the assigned user can complete this task");
+      }
+
+      const restoreStatus =
+        existing.status === "done" || existing.status === "completed"
+          ? "active"
+          : existing.status || "active";
+
+      const updatedTask: Task = {
+        ...existing,
+        status: completed ? "done" : restoreStatus,
+        completed,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const updatedTasks = (project.tasks || []).map((t) =>
+        String(t.id) === String(taskId) ? updatedTask : t
+      );
+
+      const updatedProject = { ...project, tasks: updatedTasks };
+      const saved = await updateData<Project>("projects", projectId, updatedProject);
+
+      return { projectId, task: updatedTask, updatedProject: saved };
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to update task";
+      return rejectWithValue(message);
+    }
+  }
+);
+
+// 🟦 Assign User To Project
+export const AddUserToProject = createAsyncThunk<
+  { updatedProject: any; userId: string | number },
+  { projectId: string | number; userId: string | number },
+  { rejectValue: string }
+>(
   "projects/assignTaskToUser",
   async ({ projectId, userId }, { rejectWithValue }) => {
     try {
-
       if (!projectId || !userId) throw new Error("ProjectId and UserId required");
 
-      const project = await getData(`projects/${projectId}`);
+      const project: Project = await getData(`projects/${projectId}`);
       if (!project) throw new Error("Project not found");
       const updatedProject = {
         ...project,
         members: Array.isArray(project.members) ? [...project.members, `${userId}`] : [`${userId}`],
       };
 
-      console.log(updatedProject)
       const saved = await updateData("projects", projectId, updatedProject);
-
-
-
-      return { updatedProject, userId };
-    }
-    catch (err) {
-      return rejectWithValue(
-        err.message || "Failed to assign task to user. Please try again."
-      );
+      return { updatedProject: saved, userId };
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to assign task to user. Please try again.");
     }
   }
 );
 
+// ----------------------------------------------------------------------
+// 3️⃣ الـ Slice
+// ----------------------------------------------------------------------
+
+const initialState: ProjectsState = {
+  list: [],
+  tasks: [],
+  loading: false,
+  loadingSome: false,
+  error: null,
+  selectProject: null,
+};
+
 const projectsSlice = createSlice({
   name: "projects",
-  initialState: {
-    list: [],
-    tasks: [],
-    loading: false,
-    loadingSome: false,
-    error: null,
-    selectProject: null,
-  },
+  initialState,
   reducers: {
-    toggleProjectHidden: (state, action) => {
+    toggleProjectHidden: (state, action: PayloadAction<string | number>) => {
       const project = state.list.find(p => p.id === action.payload);
       if (project) {
         project.hidden = !project.hidden;
       }
     },
-    // assignTaskToUser(state, action) {
-    //   const { taskId, userId } = action.payload;
-    //   const task = state.tasks.find(t => t.id === taskId);
-    //   if (task) {
-    //     task.assignedTo = userId;
-    //   }
-    // },
-    setSelectProject(state, action) {
+    setSelectProject: (state, action: PayloadAction<Project | null>) => {
       state.selectProject = action.payload;
     },
-
-    clearError(state) {
+    clearError: (state) => {
       state.error = null;
     },
-    setData: (state, action) => {
+    setData: (state, action: PayloadAction<{ projects?: any[] } | undefined>) => {
       const { projects: rawProjects = [] } = action.payload || {};
 
-      // تقسيم المشاريع
       state.list = rawProjects.map(({ tasks = [], ...p }) => p);
-
-      // تقسيم الـ tasks
       state.tasks = rawProjects.flatMap((p) =>
-        (p.tasks || []).map((t) => ({ ...t, projectId: p.id }))
+        (p.tasks || []).map((t: any) => ({ ...t, projectId: p.id }))
       );
 
-      // إشعارات
-      // flags
       state.loading = false;
       state.loadingSome = false;
       state.error = null;
     },
-    addTaskToProjectLocal(state, action) {
+    addTaskToProjectLocal: (state, action: PayloadAction<{ projectId: string | number; task: Task }>) => {
       const { projectId, task } = action.payload;
       const proj = state.list.find((p) => String(p.id) === String(projectId));
       if (proj) {
@@ -431,11 +490,15 @@ const projectsSlice = createSlice({
       }
       state.tasks.push({ ...task, projectId });
     },
-    addSingleProject: (state, action) => {
-      console.log(state)
-      console.log(action)
+    addSingleProject: (state, action: PayloadAction<Project>) => {
       state.list.push(action.payload);
     },
+    assignTaskToUser: (state, action: PayloadAction<{ taskId: string | number; userId: string | number }>) => {
+      // لو هتحتاج اللوجيك ده بعدين فك الكومنت عنه
+      // const { taskId, userId } = action.payload;
+      // const task = state.tasks.find(t => t.id === taskId);
+      // if (task) { task.assignedTo = userId; }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -464,7 +527,7 @@ const projectsSlice = createSlice({
         const { tasks, ...proj } = action.payload;
         state.list.push(proj);
         if (Array.isArray(tasks) && tasks.length) {
-          const flat = tasks.map((t) => ({ ...t, projectId: proj.id }));
+          const flat = tasks.map((t: any) => ({ ...t, projectId: proj.id }));
           state.tasks.push(...flat);
         }
       })
@@ -479,10 +542,34 @@ const projectsSlice = createSlice({
         state.error = null;
       })
       .addCase(addTask.fulfilled, (state, action) => {
-
         state.loadingSome = false;
         const { projectId, task, updatedProject } = action.payload;
         state.tasks.push({ ...task, projectId });
+
+        const projIndex = state.list.findIndex((p) => String(p.id) === String(projectId));
+        if (projIndex !== -1) {
+          state.list[projIndex] = {
+            ...updatedProject,
+            tasks: updatedProject.tasks || [],
+          };
+        }
+      })
+      .addCase(addTask.rejected, (state, action) => {
+        state.loadingSome = false;
+        state.error = action.payload || "Failed to add task";
+      })
+
+      // 🔹 Toggle task complete
+      .addCase(toggleTaskComplete.fulfilled, (state, action) => {
+        const { projectId, task, updatedProject } = action.payload;
+        const taskIndex = state.tasks.findIndex(
+          (t) =>
+            String(t.id) === String(task.id) &&
+            String(t.projectId) === String(projectId)
+        );
+        if (taskIndex !== -1) {
+          state.tasks[taskIndex] = { ...task, projectId };
+        }
 
         const projIndex = state.list.findIndex(
           (p) => String(p.id) === String(projectId)
@@ -494,9 +581,8 @@ const projectsSlice = createSlice({
           };
         }
       })
-      .addCase(addTask.rejected, (state, action) => {
-        state.loadingSome = false;
-        state.error = action.payload || "Failed to add task";
+      .addCase(toggleTaskComplete.rejected, (state, action) => {
+        state.error = action.payload || "Failed to update task";
       })
 
       // 🔹 Request Delete Task
@@ -515,94 +601,71 @@ const projectsSlice = createSlice({
         const projIndex = state.list.findIndex((p) => p.id === projectId);
         if (projIndex !== -1) state.list[projIndex] = updatedProject;
         state.tasks = state.tasks.filter(
-          (t) => !(String(t.projectId) === String(projectId) && !updatedProject.tasks.find((x) => x.id === t.id))
+          (t) => !(String(t.projectId) === String(projectId) && !updatedProject.tasks.find((x: any) => x.id === t.id))
         );
       })
       .addCase(confirmDeleteTask.rejected, (state, action) => {
         state.error = action.payload || "Failed to confirm delete task";
       })
-      // ------------------------------
+
       // 🟥 ARCHIVE PROJECT
-      // ------------------------------
       .addCase(archiveProject.pending, (state) => {
-        // بدأ أرشفة مشروع
         state.loadingSome = true;
       })
       .addCase(archiveProject.fulfilled, (state, action) => {
         state.loadingSome = false;
-
         const { projectId } = action.payload;
-
-        // شيل المشروع من القائمة (لأنه اتنقل للأرشيف)
         state.list = state.list.filter((p) => String(p.id) !== String(projectId));
-
-        // شيل التاسكات بتاعته
         state.tasks = state.tasks.filter((t) => String(t.projectId) !== String(projectId));
       })
       .addCase(archiveProject.rejected, (state, action) => {
         state.loadingSome = false;
-        state.error = action.payload;
+        state.error = action.payload || "Failed to archive project";
       })
 
-      // ------------------------------
       // 🟩 UNARCHIVE PROJECT
-      // ------------------------------
       .addCase(unArchiveProject.pending, (state) => {
-        // بدأ إرجاع المشروع من الأرشيف
         state.loadingSome = true;
       })
       .addCase(unArchiveProject.fulfilled, (state, action) => {
         state.loadingSome = false;
-
         const { updatedProject } = action.payload;
-
         const { tasks, ...proj } = updatedProject;
 
-        // رجّع المشروع للمين ليست
         state.list.push(proj);
-
-        // ضيف التاسكات للمين ليست
         if (Array.isArray(tasks)) {
-          state.tasks.push(...tasks.map((t) => ({ ...t, projectId: proj.id })));
+          state.tasks.push(...tasks.map((t: any) => ({ ...t, projectId: proj.id })));
         }
       })
       .addCase(unArchiveProject.rejected, (state, action) => {
         state.loadingSome = false;
-        state.error = action.payload;
+        state.error = action.payload || "Failed to unarchive project";
       })
 
-      // ------------------------------
       // ⛔ DELETE PERMANENTLY
-      // ------------------------------
       .addCase(deletePermanentlyProject.pending, (state) => {
-        // بدأ حذف نهائي
         state.loadingSome = true;
       })
       .addCase(deletePermanentlyProject.fulfilled, (state, action) => {
         state.loadingSome = false;
         const { projectId } = action.payload;
+        const actualId = projectId?.id ? projectId.id : projectId;
 
-
-        // شيل المشروع نهائيًا
-        state.list = state.list.filter((p) => String(p.id) != String(projectId.id));
-        state.tasks = state.tasks.filter((t) => String(t.projectId) != String(projectId.id));
+        state.list = state.list.filter((p) => String(p.id) !== String(actualId));
+        state.tasks = state.tasks.filter((t) => String(t.projectId) !== String(actualId));
       })
       .addCase(deletePermanentlyProject.rejected, (state, action) => {
         state.loadingSome = false;
-        state.error = action.payload;
+        state.error = action.payload || "Failed to delete project permanently";
       })
 
-      // ------------------------------
       // 🟧 STOP PROJECT
-      // ------------------------------
       .addCase(stopProject.pending, (state) => {
         state.loadingSome = true;
       })
       .addCase(stopProject.fulfilled, (state, action) => {
         state.loadingSome = false;
-
         const updated = action.payload;
-
         const i = state.list.findIndex((p) => p.id === updated.id);
         if (i !== -1) {
           state.list[i] = { ...state.list[i], status: updated.status };
@@ -610,33 +673,30 @@ const projectsSlice = createSlice({
       })
       .addCase(stopProject.rejected, (state, action) => {
         state.loadingSome = false;
-        state.error = action.payload;
+        state.error = action.payload || "Failed to stop project";
       })
 
-      // ------------------------------
       // 👁️ HIDE PROJECT
-      // ------------------------------
       .addCase(hideProject.pending, (state) => {
         state.loadingSome = true;
       })
       .addCase(hideProject.fulfilled, (state, action) => {
         state.loadingSome = false;
         const updated = action.payload;
-
-        const i = state.list.findIndex((p) => p.id == updated.id);
+        const i = state.list.findIndex((p) => String(p.id) === String(updated.id));
         if (i !== -1) {
-          state.list[i] = action.payload;
+          state.list[i] = updated;
         }
       })
       .addCase(hideProject.rejected, (state, action) => {
         state.loadingSome = false;
-        state.error = action.payload;
-      }).addCase(AddUserToProject.fulfilled, (state, action) => {
-        const { updatedProject, userId } = action.payload;
-        const projIndex = state.list.findIndex(
-          (p) => String(p.id) === String(updatedProject.id)
-        );
+        state.error = action.payload || "Failed to toggle hide project";
+      })
 
+      // 👥 ASSIGN USER TO PROJECT
+      .addCase(AddUserToProject.fulfilled, (state, action) => {
+        const { updatedProject } = action.payload;
+        const projIndex = state.list.findIndex((p) => String(p.id) === String(updatedProject.id));
 
         if (projIndex !== -1) {
           state.list[projIndex] = {
@@ -644,13 +704,21 @@ const projectsSlice = createSlice({
             tasks: updatedProject.tasks || [],
           };
         }
-      }).addCase(AddUserToProject.rejected, (state, action) => {
+      })
+      .addCase(AddUserToProject.rejected, (state, action) => {
         state.error = action.payload || "Failed to assign user to project";
       });
-
   },
 });
 
-export const { setSelectProject, clearError, addTaskToProjectLocal, setData, addSingleProject, toggleProjectHidden, assignTaskToUser } =
-  projectsSlice.actions;
+export const {
+  setSelectProject,
+  clearError,
+  addTaskToProjectLocal,
+  setData,
+  addSingleProject,
+  toggleProjectHidden,
+  assignTaskToUser,
+} = projectsSlice.actions;
+
 export default projectsSlice.reducer;

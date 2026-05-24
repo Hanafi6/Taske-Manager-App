@@ -1,8 +1,9 @@
 // src/App.jsx
-import { Routes, Route, useLocation, useParams, useNavigate } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch } from "./store/Hooks";
+import { useAppSelector } from "./store/Hooks"
 
 // pages / components
 import Dashboard from "./pages/Dashboard";
@@ -10,13 +11,12 @@ import UsersPage from "./pages/UsersPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import TasksPage from "./pages/TasksPage";
 import Home from "./pages/Home.jsx";
-import NavBar from "./components/NavBar";
 import Regester from "./pages/Regester";
 import LogIn from "./pages/LogIn";
 import ProtectedRoute from "./components/ProtectedPath.jsx";
 import ViewProject from "./components/ViewProject.jsx";
 import ViweerSingelTaske from "./pages/ViweerSingelTaske.jsx";
-import User from "./pages/User.jsx";
+import UserPage from "./pages/User.jsx";
 import PageSlide from "./components/PageSlide.jsx";
 import PageFade from "./components/PageFade.jsx";
 import AnimatedSelect from "./components/AnimatedSelect";
@@ -25,24 +25,30 @@ import AddTaskToProject from "./pages/AddTaskToProject .jsx";
 import Notifications from "./pages/Notifications.jsx";
 
 // slices / thunks
-import { fetchUsers } from "./slices/AuthSlice.js";
+import { fetchUsers } from "./slices/usersSlice";
+import { fetchNotifications } from "./slices/notificationsSlice";
+import { setListOfUsers, setOpenDiitailsDelete } from "./slices/Modals";
+import {
+  archiveProject,
+  fetchProjects,
+  hideProject,
+  deletePermanentlyProject,
+  AddUserToProject,
+} from "./slices/projectsSlice";
+import type { User } from "./types";
+import type { Project } from "./slices/projectsSlice";
 
-// RTK Query hooks (تأكد المسار صحيح)
-import { archiveProject, fetchProjects, hideProject, deletePermanentlyProject, AddUserToProject } from "./slices/projectsSlice";
-import { fetchNotifications } from "./slices/notificationsSlice.js";
-import { setListOfUsers, setOpenDiitailsDelete } from "./slices/Modals.js";
+const ListOfUser = ({ user }: { user: User | null }) => {
+  const users = useAppSelector((s) => s.auth.usersList ?? s.users.list);
+  const dispatch = useAppDispatch();
+  const selectProject = useAppSelector(s => s.projects.selectProject) || null;
 
-
-const ListOfUser = ({user}) => {
-  const users = useSelector(s => s.auth.usersList);
-  const dispatch = useDispatch();
-  const selectProject = useSelector(s => s.projects.selectProject) || null;
-
-  const CoiseUser = (user) => {
-    dispatch(AddUserToProject({ projectId: selectProject.id, userId: user.id }))
+  const CoiseUser = (picked: User) => {
+    if (!selectProject) return;
+    dispatch(AddUserToProject({ projectId: selectProject.id, userId: picked.id }));
     dispatch(setListOfUsers(false))
   }
-  
+
   return (
     <motion.div
       className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-40"
@@ -61,7 +67,7 @@ const ListOfUser = ({user}) => {
         <h2 className="text-2xl font-bold mb-4 text-gray-800">Users List</h2>
         <button onClick={() => dispatch(setListOfUsers(false))} className="text-sm  text-white px-3 py-1 rounded hover:bg-red-600 transition">Close</button>
         <div className="space-y-2 mt-4  flex items-center justify-center flex-col  w-full">
-          {users && users.length > 0 ? (  
+          {users && users.length > 0 ? (
             users.filter(e => e.role == 'user' && e.id != user.id).map(user => (
               <div key={user.id} className="p-3 border  border-gray-200 rounded-lg  hover:bg-black transition">
                 <h4 onClick={e => CoiseUser(user)} className="font-semibold text-center cursor-pointer hover:text-[#fff]  text-gray-900">{user.name}</h4>
@@ -76,11 +82,23 @@ const ListOfUser = ({user}) => {
   );
 };
 
-const DitailsOfDelete = ({ project, list, onClose }) => {
-  const dispatch = useDispatch();
+const DitailsOfDelete = ({
+  project,
+  list,
+  onClose,
+}: {
+  project: Project | null;
+  list: {
+    hide: (p: Project) => void;
+    delete: (p: Project) => void;
+    archive: (p: Project) => void;
+  };
+  onClose: () => void;
+}) => {
+  // const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-useEffect(() => {
+  useEffect(() => {
     document.addEventListener('contextmenu', e => {
       e.preventDefault();
       console.log(e)
@@ -156,48 +174,34 @@ useEffect(() => {
 
 
 export default function App() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const location = useLocation();
-  const Project = useSelector((s) => s.projects.selectProject);
-  const Tasks = useSelector(s => s.projects)
-  const ListOfUsers = useSelector(s => s.modals.ListOfUsers);
-  const user= useSelector(s => s.auth.user);
+  const Project = useAppSelector((s) => s.projects.selectProject);
+  // const Tasks = useAppSelector(s => s.projects)
+  const ListOfUsers = useAppSelector(s => s.modals.ListOfUsers);
+  const user = useAppSelector(s => s.auth.user);
 
 
 
   const navigate = useNavigate();
-  const OpenDatilsDeleteProject = useSelector((s) => s.modals.OpenDatilsDeleteProject);
-
-  useEffect(() => {
-    if (typeof BroadcastChannel === "undefined") return;
-    const ch = new BroadcastChannel("task-manager-channel");
-    ch.onmessage = (ev) => {
-      const { type } = ev.data || {};
-      if (type === "notifications:updated") {
-        // invalidates tags => ستجبر RTKQ على إعادة جلب notifications
-        dispatch(api.util.invalidateTags([{ type: "Notifications", id: "LIST" }]));
-      }
-    };
-    return () => ch.close();
-  }, [dispatch]);
+  const OpenDatilsDeleteProject = useAppSelector((s) => s.modals.OpenDatilsDeleteProject);
 
   useEffect(() => {
     dispatch(fetchProjects());
-
     dispatch(fetchNotifications());
     dispatch(fetchUsers());
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen ">
       <AnimatePresence mode="sync">
         {OpenDatilsDeleteProject && (
-          <DitailsOfDelete project={Project} onClose={e => dispatch(setOpenDiitailsDelete(false))} list={{
+          <DitailsOfDelete project={Project} onClose={() => dispatch(setOpenDiitailsDelete(false))} list={{
             hide: (proj) => dispatch(hideProject(proj)),
-            
+
             delete: (proj) => dispatch(deletePermanentlyProject(proj)),
             archive: (proj) => dispatch(archiveProject(proj)),
-          }} onDelete={(proj) => {
+          }} onDelete={(proj:Project) => {
             dispatch(archiveProject(proj))
             navigate('/')
           }} />
@@ -207,7 +211,7 @@ export default function App() {
       <AnimatePresence>
         {ListOfUsers && <ListOfUser user={user} />}
       </AnimatePresence>
-      <NavBar />
+
 
       <main className="container mx-auto my-15 px-4 py-6">
 
@@ -238,13 +242,13 @@ export default function App() {
               }
             />
 
-        
-
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute allowedRoles={["admin", "user"]}>
-                  <PageSlide><Dashboard /></PageSlide>
+                  <PageSlide>
+                    <Dashboard />
+                  </PageSlide>
                 </ProtectedRoute>
               }
             />
@@ -310,7 +314,7 @@ export default function App() {
               path="/user/:id"
               element={
                 <ProtectedRoute allowedRoles={["admin", "user"]}>
-                  <PageSlide><User /></PageSlide>
+                  <PageSlide><UserPage /></PageSlide>
                 </ProtectedRoute>
               }
             />

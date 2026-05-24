@@ -1,12 +1,12 @@
 // pages/Home.jsx
 import React from "react";
-import { useSelector } from "react-redux";
 import ProjectsAccordionUnified from "../components/ProjectsAccordion";
+import { useAppSelector } from "../store/Hooks";
 
 export default function Home() {
-  const role = useSelector((s) => s.auth?.user?.role) || "user";
+  const role = useAppSelector((s) => s.auth?.user?.role) || "user";
 
-  let mode = role == 'admin' ? 'auto':'mine'
+  let mode = role == 'admin' ? 'auto' : 'mine'
 
   return (
     <section className="mb-10">
@@ -16,7 +16,6 @@ export default function Home() {
         </h3>
       </div>
       <ProjectsAccordionUnified mode={mode} />
-    
     </section>
   );
 }

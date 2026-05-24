@@ -1,19 +1,19 @@
 // pages/ViewProject.jsx
 import React, { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import ProjectCard from "../components/ProjectCard";
 import { makeSelectTasksByProjectId, selectProjectById } from "../store/selectors";
 import { archiveProject } from "../slices/projectsSlice";
 
+import { useAppDispatch, useAppSelector } from "../store/Hooks";
 
 export default function ViewProject() {
   const { id } = useParams();
-  const dispach = useDispatch()
+  const dispach = useAppDispatch()
   const navigate = useNavigate()
 
-  const { loading } = useSelector((s) => s.projects || { loading: false });
-  const user = useSelector((s) => s.auth?.user);
+  const { loading } = useAppSelector((s) => s.projects || { loading: false });
+  const user = useAppSelector((s) => s.auth?.user);
 
   if (user.role !== "admin") {
     return <div className="p-6">❌ Access Denied</div>;
@@ -26,11 +26,11 @@ export default function ViewProject() {
     return typeof selectProjectById === "function" ? selectProjectById(id) : null;
   }, [id]);
 
-  const project = useSelector((state) => (selectProject ? selectProject(state) : null));
+  const project = useAppSelector((state) => (selectProject ? selectProject(state) : null));
 
   // memoize tasks selector factory and use it
   const selectTasks = useMemo(() => makeSelectTasksByProjectId(id), [id]);
-  const tasks = useSelector((state) => selectTasks(state)) || [];
+  const tasks = useAppSelector((state) => selectTasks(state)) || [];
 
   // debug — شيلها بعد التأكد
   // console.log("ViewProject", { id, project, tasks });
@@ -43,8 +43,6 @@ export default function ViewProject() {
     navigate('/')
   }
 
-  console.log(user);
-  
   return (
     <div className="container mx-auto  px-6 py-8">
 

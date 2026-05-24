@@ -1,10 +1,10 @@
 // pages/CreateProject.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 // import { addSingleProject } from "../slices/projectsSlice";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import { addProject } from "../slices/projectsSlice";
+import { useAppDispatch, useAppSelector } from "../store/Hooks";
 
 // دوال لتحويل التاريخ ISO
 function toIsoEndOfDay(dateStr) {
@@ -19,12 +19,12 @@ function toIsoStart(dateStr) {
 }
 
 export default function CreateProject() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const authUser = useSelector((s) => s.auth?.user);
+  const authUser = useAppSelector((s) => s.auth?.user);
   const creatorId = Number(authUser?.id);
-  const { usersList: users = [], usersLoading, usersError } = useSelector(
+  const { usersList: users = [], usersLoading, usersError } = useAppSelector(
     (s) => s.auth || {}
   );
 
@@ -41,7 +41,7 @@ export default function CreateProject() {
     dueAt: "",
   });
 
-  const { loading: saving } = useSelector(s => s.projects);
+  const { loading: saving } = useAppSelector(s => s.projects);
 
   // addProject
   const [query, setQuery] = useState("");

@@ -1,73 +1,71 @@
-# React + TypeScript + Vite
+# 🚀 Task Manager Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### _Enterprise-Grade Project & Team Management System_
 
-Currently, two official plugins are available:
+A professional, internal SPA (Single Page Application) platform designed to streamline project management, task assignment, and team collaboration between administrators and team members. Features include comprehensive workload tracking, real-time analytics, and role-based access control.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🛠️ Tech Stack & Architecture
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend:** React 19, Vite, Tailwind CSS v4, TypeScript.
+- **State Management:** Redux Toolkit (Thunks for Async Operations + RTK Listeners for side effects like real-time notifications).
+- **Performance Optimization:** Highly optimized using Memoized Selectors (`createSelector`) for efficient state querying and real-time analytics.
+- **UI/UX & Interactivity:** Framer Motion (Fluid animations), Lucide Icons, `@hello-pangea/dnd` (Drag & Drop Kanban board).
+- **Data Visualization:** Chart.js with `react-chartjs-2`.
+- **Routing & API:** React Router v7, RESTful API architecture integrated with a local JSON Server backend (`db.json`).
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🌟 Key Features Implemented
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 🛡️ Authentication & Role-Based Access Control (RBAC)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Fully secure User Registration and Login with session persistence via `localStorage`.
+- **Protected Routes:** Strict multi-role routing system (Admin vs. Member).
+- **Dynamic Data Views:** Admins have absolute visibility over all teams and projects, while Members get a customized view filtering only their assigned workspace.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 👥 Advanced Team & User Management
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- Complete team directory with real-time text-search and dynamic filtering (Admin / Member).
+- Executive Admin statistics panel displaying absolute numbers of users, admins, and members.
+- Dynamic metric cards showing individual workloads (active tasks count, total projects) with one-click navigation to user profiles.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 📊 Interactive Business Dashboard & Analytics
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Executive KPIs tracking system-wide projects, active tasks, and team counts.
+- Interactive data visualization using Chart.js to map project distributions and task statuses.
+- Fully functional Kanban Board utilizing Drag & Drop for rapid task status transitions.
+
+### 📁 Scalable Project & Task Infrastructure
+
+- Complete CRUD operations handled efficiently via Async Redux Thunks.
+- **Robust Data Modeling:** Tasks are structured securely under `state.projects.tasks` and dynamically referenced to parent projects via `projectId`.
+- Multi-state project lifecycle management (**Active**, **Hidden**, **Archived**, **Completed**).
+- Advanced task cards featuring live timers, priority tags, and status markers (_Overdue_, _Blocked_, _Done_).
+
+---
+
+## 🚀 Getting Started
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/Hanafi6/Taske-Manager-App.git](https://github.com/Hanafi6/Taske-Manager-App.git)
+   cd Taske-Manager-App
+   ```
+
+📁 Project Structure
+
+src/
+├── api/ # REST API fetch configurations
+├── components/ # Reusable UI Components (Sidebar, NavBar, etc.)
+├── store/ # Redux Toolkit Slices & selectors.ts
+├── pages/ # Page layouts (Dashboard, Projects, Tasks, Auth)
+├── App.tsx # Main application component & routes
+└── main.tsx # Application entry point & providers
+
+📝 License
+
+This project is open-source and available under the MIT License.

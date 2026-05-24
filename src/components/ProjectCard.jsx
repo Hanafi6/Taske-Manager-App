@@ -1,14 +1,16 @@
 // components/ProjectCard.jsx
 import React, { use, useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { shallowEqual, useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { CircleArrowOutDownLeft, Delete } from "lucide-react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import TaskCard from "../components/TaskeCard"; // تأكد من المسار والاسم
-import { makeSelectTasksByProjectId } from "../store/selectors";
+import { makeSelectTasksByProjectId, selectUsers } from "../store/selectors";
 import { setListOfUsers, setOpenDiitailsDelete, setContextMeneuDimention, setShowContextMeneu, setSelectElement } from "../slices/Modals";
 import { setSelectProject } from "../slices/projectsSlice";
-import ProjectSection from "../typs/TypsOfNavigates";
+import { ProjectSection } from "../typs/TypsOfNavigates";
+import { useAppSelector, useAppDispatch } from "../store/Hooks";
+
 
 // Helpers (مثل ما عندك)
 const PRIORITY_ORDER = ["urgent", "high", "medium", "low"];
@@ -50,6 +52,7 @@ function projectBadge(project, tasks, isSelected = false) {
 
   if (isSelected) {
     return {
+      hover: "hover:cursor-wait",
       ring: "ring-yellow-400",
       bg: "bg-yellow-50",
       badge: "Selected",
@@ -58,25 +61,25 @@ function projectBadge(project, tasks, isSelected = false) {
   }
 
   if (allDone || ["completed", "done"].includes(lower(project?.status))) {
-    return { ring: "ring-green-400", bg: "bg-green-50", badge: "Completed", badgeCls: "bg-green-100 text-green-700" };
+    return { hover: "", ring: "ring-green-400", bg: "bg-green-50", badge: "Completed", badgeCls: "bg-green-100 text-green-700" };
   }
 
   if (hasUrgentOrHigh || hasOverdue) {
-    return { ring: "ring-red-400", bg: "bg-red-50", badge: hasOverdue ? "Overdue" : "Important", badgeCls: "bg-red-100 text-red-700" };
+    return { hover: "", ring: "ring-red-400", bg: "bg-red-50", badge: hasOverdue ? "Overdue" : "Important", badgeCls: "bg-red-100 text-red-700" };
   }
 
   if (lower(project?.status) === "active") {
-    return { ring: "ring-sky-400", bg: "bg-sky-50", badge: "Active", badgeCls: "bg-sky-100 text-sky-700" };
+    return { hover: "", ring: "ring-sky-400", bg: "bg-sky-50", badge: "Active", badgeCls: "bg-sky-100 text-sky-700" };
   }
 
   if (lower(project?.status) === "block" || lower(project?.status) === "blocked") {
-    return { ring: "ring-gray-500", bg: "bg-gray-100", badge: "Blocked", badgeCls: "bg-gray-300 text-gray-800" };
+    return { hover: "", ring: "ring-gray-500", bg: "bg-gray-100", badge: "Blocked", badgeCls: "bg-gray-300 text-gray-800" };
   }
 
   return { ring: "ring-gray-300", bg: "bg-gray-50", badge: "Idle", badgeCls: "bg-gray-100 text-gray-700" };
 }
 
-export default function ProjectCard({
+function ProjectCard({
   project,
   tasksForProject = [],
   mode = "all",
@@ -93,12 +96,13 @@ export default function ProjectCard({
   onClickContext = () => { }
 }) {
   const navigate = useNavigate();
-  const { role } = useSelector((s) => s.auth || {});
-  const users = useSelector((s) => s.auth?.usersList || []);
-  const { tasks: allFlatTasks = [] } = useSelector((s) => s.projects || { tasks: [] });
+  const { role } = useAppSelector((s) => s.auth || {});
+  const users = useAppSelector(selectUsers);
+
+  const { tasks: allFlatTasks = [] } = useAppSelector((s) => s.projects || { tasks: [] });
   const dispach = useDispatch();
 
-  const { ContextMeneuDimention, ShowContextMeneu, SelectElement } = useSelector((s) => s.modals || {});
+  const { ContextMeneuDimention, ShowContextMeneu, SelectElement } = useAppSelector((s) => s.modals || {});
   const isSelected = SelectElement?.id === project?.id;
 
   // --- Normalize IDs and inputs to avoid type-mismatch bugs ---
@@ -106,8 +110,6 @@ export default function ProjectCard({
   const numericCurrentUserId = currentUserId != null ? Number(currentUserId) : null;
 
   let tasks = []
-
-
 
   if (!mineTaskes) {
     // If tasksForProject is provided and is an array — use it.
@@ -117,7 +119,7 @@ export default function ProjectCard({
       : allFlatTasks.filter((t) => t.projectId == projId);
   } else {
     const ts = useMemo(() => projId ? makeSelectTasksByProjectId(projId) : () => [], [projId]);
-    tasks = useSelector(ts);
+    tasks = useAppSelector(ts);
   }
 
 
@@ -134,10 +136,12 @@ export default function ProjectCard({
     }
     : null;
 
-  const isDitailsOpen = useSelector((s) => s.modals.OpenDatilsDeleteProject)
+  const isDitailsOpen = useAppSelector((s) => s.modals.OpenDatilsDeleteProject)
 
-  const leader = users.find((u) => Number(u.id) === Number(project?.leaderId)) || null;
+  const leader = users?.find((u) => u.id == project?.leaderId) || null;
   const topPrio = getTopPriorityInProject(tasks);
+
+
 
   const [open, setOpen] = React.useState(defaultOpen);
 
@@ -154,7 +158,7 @@ export default function ProjectCard({
 
   // InfoChips (بقي كما عندك)
   const InfoChips = (
-    <div className="flex flex-wrap items-center gap-2 shrink-0">
+    <div className="flex  flex-wrap items-center gap-2 shrink-0">
       {showMeta && (
         <>
           {project?.leaderId != null && (
@@ -199,7 +203,7 @@ export default function ProjectCard({
   );
 
   const Content = (
-    <div className="px-4 pb-4 pt-3 bg-white">
+    <div className="px-4 pb-4  pt-3 bg-white">
       <h4 className="font-semibold mb-2">
         {mode == "mine" ? `My Tasks (${+tasks?.length})` : `Tasks (${tasks.length})`}
       </h4>
@@ -239,7 +243,7 @@ export default function ProjectCard({
 
 
   return (
-    <motion.li onContextMenu={e => onClickContext(e, project)} className={`rounded-lg  border border-gray-200 ring-2 ${pc.ring} overflow-hidden ${hidden && 'bg-gray-300   '} `}>
+    <motion.li onContextMenu={e => onClickContext(e, project)} className={`rounded-lg border ${pc.hover} border-gray-200 ring-2 ${pc.ring} overflow-hidden ${hidden && 'bg-gray-300   '} `}>
 
       <div className={`w-full px-4 py-3 ${pc.bg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -341,3 +345,4 @@ export default function ProjectCard({
   );
 }
 
+export default React.memo(ProjectCard);

@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+
+import { useAppDispatch, useAppSelector } from "../store/Hooks";
 
 import {
     fetchNotifications,
@@ -26,13 +27,13 @@ function TabButton({ active, onClick, children }) {
 }
 
 export default function NotificationsPage() {
-    const dispatch = useDispatch();
-    const user = useSelector((s) => s.auth?.user);
-    const projects = useSelector((s) => s.projects?.list || []);
+    const dispatch = useAppDispatch();
+    const user = useAppSelector((s) => s.auth?.user);
+    const projects = useAppSelector((s) => s.projects?.list || []);
 
-    const notificationsList = useSelector(selectNotificationsList);
-    const loading = useSelector((s) => s.notifications?.loading);
-    const error = useSelector((s) => s.notifications?.error);
+    const notificationsList = useAppSelector(selectNotificationsList);
+    const loading = useAppSelector((s) => s.notifications?.loading);
+    const error = useAppSelector((s) => s.notifications?.error);
 
     const [tab, setTab] = useState("all"); // all | unread | actionable | byProject | undoable
     const [search, setSearch] = useState("");

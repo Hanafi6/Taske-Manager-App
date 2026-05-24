@@ -1,10 +1,10 @@
 // components/TaskCard.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { computeTaskTimeMeta, formatDuration, GetProjectById, GetTaskeById, selectUserId } from "../store/selectors";
-import { useDispatch, useSelector } from "react-redux";
+import { computeTaskTimeMeta, formatDuration, GetProjectById, selectUserId, selectUsers } from "../store/selectors";
 import { setListOfUsers } from "../slices/Modals";
 
+import { useAppDispatch, useAppSelector } from "../store/Hooks";
 const cls = {
   ring: (t, overdue) => {
     if (t.status === "done") return "ring-green-400";
@@ -41,7 +41,7 @@ export default function TaskCard({
   clickable = true,
 }) {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
 
   // ⏱️ نعمل state للوقت الحالي لتحديث العدّاد كل ثانية
@@ -61,7 +61,7 @@ export default function TaskCard({
   const badge = cls.badge(task, overdue);
 
 
-  
+
 
 
 
@@ -98,10 +98,15 @@ export default function TaskCard({
              */}
             <span>• Priority: {task.priority || "—"}</span>
             {task.dueDate && <span>• Due: {new Date(task.dueDate).toLocaleString()}</span>}
-            {/* {showAssignee && task.assignedTo != null && <span>• Assignee: { useSelector(s => GetTaskeById(s,task.assignedTo)).name }</span>} */}
-            {showAssignee && task.assignedTo != null && <span>• To : { useSelector(s => selectUserId(task?.assignedTo,s.auth?.usersList))?.name}</span>}
-            
-            {showProject && task.projectId != null && <span >• Project : <span onClick={e => navigate(`/project/${task.projectId}`)} className="duration-200 hover:bg-red-500 cursor-pointer p-1 rounded hover:font-bold hover:text-[#fff]">{useSelector(s =>GetProjectById(s,task.projectId))?.name}</span></span>}
+            {/* {showAssignee && task.assignedTo != null && <span>• Assignee: { useAppSelector(s => GetTaskeById(s,task.assignedTo)).name }</span>} */}
+            {showAssignee && task.assignedTo != null && (
+              <span>
+                • To :{" "}
+                {useAppSelector((s) => selectUserId(task?.assignedTo, selectUsers(s)))?.name ?? "—"}
+              </span>
+            )}
+
+            {showProject && task.projectId != null && <span >• Project : <span onClick={e => navigate(`/project/${task.projectId}`)} className="duration-200 hover:bg-red-500 cursor-pointer p-1 rounded hover:font-bold hover:text-[#fff]">{useAppSelector(s => GetProjectById(s, task.projectId))?.name}</span></span>}
           </div>
         )}
 

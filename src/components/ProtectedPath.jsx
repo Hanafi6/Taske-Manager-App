@@ -1,10 +1,11 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
+
+import { useAppSelector, useAppDispatch } from "../store/Hooks";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const location = useLocation();
-    const user = useSelector((state) => state.auth?.user);
+    const user = useAppSelector((state) => state.auth?.user);
 
     // 1️⃣ لو مش عامل تسجيل دخول → رجّعه login ومعاه منين جه
     if (!user) {

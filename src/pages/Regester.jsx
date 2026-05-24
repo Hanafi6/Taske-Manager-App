@@ -1,13 +1,13 @@
 // src/pages/Register.jsx
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { addUser } from "../slices/usersSlice"; // افترض إنك عامل action لإضافة مستخدم جديد
+import { useAppDispatch, useAppSelector } from "../store/Hooks";
 
 function Register() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { list } = useSelector((state) => state.users);
+  const { list } = useAppSelector((state) => state.users);
 
   const [formData, setFormData] = useState({
     name: "",

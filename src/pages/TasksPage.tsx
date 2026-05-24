@@ -1,27 +1,21 @@
-// pages/TasksPage.tsx
-import React, { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import TaskCard from "../components/TaskeCard";
 import { makeSelectTasks } from "../store/selectors";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAppSelector } from "../store/Hooks";
+import type { TaskWithMeta } from "../types/selectors";
 
 const TasksPage: React.FC = () => {
-  const { user, role } = useSelector((s: any) => s.auth);
+  const { user } = useAppSelector((s) => s.auth);
+  const role = user?.role;
 
   const selectTasks = useMemo(
-    () => makeSelectTasks({ userId: user.id, role }),
-    [user.id, role]
+    () => makeSelectTasks({ userId: user?.id, role }),
+    [user?.id, role]
   );
 
+  const { grouped, statuses } = useAppSelector(selectTasks);
 
-
-
-  const { grouped, statuses } = useSelector((state) =>
-    selectTasks(state)
-  );
-
-
-  // 🔥 Active tab state
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,24 +26,21 @@ const TasksPage: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4 space-y-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        Tasks Overview
-      </h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Tasks Overview</h1>
 
-      {/* ===== Tabs Header ===== */}
       <div className="flex space-x-6 border-b border-gray-300 mb-6 relative">
         {statuses.length > 0 ? (
-          statuses.map((status) => (
+          statuses.map((status: string) => (
             <div
               key={status}
               className="cursor-pointer pb-2 relative"
               onClick={() => setActiveTab(status)}
             >
-              <span className={`capitalize ${activeTab === status ? "font-semibold" : "font-normal"}`}>
+              <span
+                className={`capitalize ${activeTab === status ? "font-semibold" : "font-normal"}`}
+              >
                 {status.replace("_", " ")}
               </span>
-
-              {/* Animated underline */}
               {activeTab === status && (
                 <motion.div
                   layoutId="underline"
@@ -63,10 +54,9 @@ const TasksPage: React.FC = () => {
         )}
       </div>
 
-      {/* ===== Tab Content ===== */}
       {statuses.length > 0 ? (
-        <AnimatePresence exitBeforeEnter>
-          {statuses.map((status) =>
+        <AnimatePresence mode="wait">
+          {statuses.map((status: string) =>
             status === activeTab ? (
               <motion.section
                 key={status}
@@ -77,7 +67,7 @@ const TasksPage: React.FC = () => {
               >
                 {grouped[status] && grouped[status].length > 0 ? (
                   <div className="space-y-3">
-                    {grouped[status].map((task: any) => (
+                    {grouped[status].map((task: TaskWithMeta) => (
                       <TaskCard
                         key={task.id}
                         task={task}

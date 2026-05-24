@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import {  Menu, X } from "lucide-react";
-import { useSelector } from "react-redux";
+import { Menu, X } from "lucide-react";
+
+import { useAppDispatch, useAppSelector } from "../store/Hooks";
 
 import '../style/navBar.css'
 
@@ -21,7 +22,7 @@ function NavBar() {
 
 
 
-    const { user } = useSelector((state) => state.auth);
+    const { user } = useAppSelector((state) => state.auth);
 
 
     // if (!user) navigate('/log_in')
@@ -172,7 +173,7 @@ function NavBar() {
                                         : "text-gray-700 hover:text-blue-600"
                                         }`}
                                 >
-                                    {link.pa}
+                                    {link.name}
                                 </Link>
                             )
                         })}

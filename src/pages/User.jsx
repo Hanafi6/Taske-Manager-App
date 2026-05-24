@@ -1,7 +1,6 @@
 // pages/User.jsx
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { useSelector } from "react-redux";
 import TaskCard from "../components/TaskeCard";
 import {
   makeSelectUserProjects,
@@ -9,16 +8,18 @@ import {
   makeSelectTasks,
 } from "../store/selectors"; // عدّل المسار حسب مكانك
 
+import { useAppSelector } from "../store/Hooks";
+
 export default function User() {
   const { id } = useParams();
   const uid = Number(id);
 
-  const user = useSelector((s) =>
+  const user = useAppSelector((s) =>
     (s.auth?.usersList || []).find((u) => Number(u.id) === uid)
   );
 
   const selectMyProjects = React.useMemo(() => makeSelectUserProjects(uid), [uid]);
-  const myProjects = useSelector(selectMyProjects);
+  const myProjects = useAppSelector(selectMyProjects);
 
 
   const selectCollabsPerProject = React.useMemo(
@@ -26,11 +27,11 @@ export default function User() {
     [uid]
   );
 
-  const collabTree = useSelector(selectCollabsPerProject);
-  
-  
-  const selectMyTasks = React.useMemo(() => makeSelectTasks({userId:uid,role:user.role}), [uid]);
-  const myTasks = useSelector(selectMyTasks);
+  const collabTree = useAppSelector(selectCollabsPerProject);
+
+
+  const selectMyTasks = React.useMemo(() => makeSelectTasks({ userId: uid, role: user.role }), [uid]);
+  const myTasks = useAppSelector(selectMyTasks);
 
 
   if (!user) return <div className="p-6">❌ User not found</div>;

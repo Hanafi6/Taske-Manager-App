@@ -8,7 +8,8 @@ import {
   RotateCcw
 } from "lucide-react";
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
+
+import { useAppSelector } from "../store/Hooks"
 
 /* ================= TYPES ================= */
 
@@ -118,7 +119,7 @@ function ContextMenu({
       {actions.map(action => (
         <div key={action.key}>
           {action.dividerBefore && <Divider />}
-          <MenuItem {...action} />
+          <MenuItem {...action} key={action.key} />
         </div>
       ))}
     </motion.div>
@@ -168,10 +169,9 @@ export default function GlobalContextMenu() {
     ShowContextMeneu,
     ContextMeneuDimention,
     SelectElement,
-  } = useSelector((s: any) => s.modals);
+  } = useAppSelector((s: any) => s.modals);
 
   const actions = getContextActions(SelectElement);
-
   useEffect(() => {
     const prevent = (e: MouseEvent) => e.preventDefault();
     document.addEventListener("contextmenu", prevent);
@@ -182,6 +182,7 @@ export default function GlobalContextMenu() {
     <AnimatePresence mode="sync">
       {ShowContextMeneu && ContextMeneuDimention && (
         <ContextMenu
+          key={SelectElement.id}
           top={ContextMeneuDimention.top}
           left={ContextMeneuDimention.left}
           actions={actions}

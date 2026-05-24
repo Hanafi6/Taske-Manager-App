@@ -1,21 +1,22 @@
 // src/components/AddTaskToProject.jsx
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { addTask, setSelectProject } from "../slices/projectsSlice";
 import { selectProjects, selectUsers } from "../store/selectors";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { useAppDispatch, useAppSelector } from "../store/Hooks";
+
 const AddTaskToProject = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
-  const dispatch = useDispatch();
-  const projects = useSelector(selectProjects);
-  const selectProject = useSelector((state) => state.projects.selectProject);
-  const users = useSelector(selectUsers);
-  
-  const { user } = useSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const projects = useAppSelector(selectProjects);
+  const selectProject = useAppSelector((state) => state.projects.selectProject);
+  const users = useAppSelector(selectUsers);
 
+  const { user } = useAppSelector((state) => state.auth);
+  
   const [warning, setWarning] = useState("");
   const [IsWarning, setIsWarning] = useState(false);
   const [members, setMembers] = useState([]);
@@ -58,15 +59,14 @@ const AddTaskToProject = () => {
 
   // Set members when project changes
   useEffect(() => {
-    if (selectProject && projectId) {
+    if (selectProject ) {
       const memberIds = selectProject.members || users.filter(e => e.id);
-      setMembers(users.filter((u) => memberIds.includes(u.id )));
-  console.log(members)
-      
+      setMembers(users.filter((u) => memberIds.includes(u.id)));
     } else {
       setMembers([]);
     }
   }, [selectProject, users]);
+
 
   // Auto calculate estimateHours
   useEffect(() => {
@@ -101,7 +101,7 @@ const AddTaskToProject = () => {
       description: form.description,
       status: "active",
       priority: form.priority,
-      assignedTo: form.assignedTo , // يمكن يكون null
+      assignedTo: form.assignedTo, // يمكن يكون null
       createdBy: user.id,
       requirements: form.requirements
         ? form.requirements.split(",").map((s) => s.trim())
@@ -127,6 +127,7 @@ const AddTaskToProject = () => {
       setWarning(err.message || "Failed to add task.");
     }
   };
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -210,7 +211,11 @@ const AddTaskToProject = () => {
             className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500"
           >
             <option value="">-- Unassigned --</option>
-            {members.map((m) => (
+            {members.length > 0 ? members.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            )) : users.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}
               </option>

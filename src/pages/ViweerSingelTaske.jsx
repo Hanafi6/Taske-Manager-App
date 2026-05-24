@@ -1,8 +1,9 @@
 // src/pages/ViweerSingelTaske.jsx
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import { AnimatePresence, motion } from "framer-motion";
+
+import { useAppSelector, useAppDispatch } from "../store/Hooks";
 
 import {
   makeSelectTaskDetails,
@@ -11,7 +12,12 @@ import {
   makeSelectProjectById,
 } from "../store/selectors";
 
-import { requestDeleteTask, confirmDeleteTask } from "../slices/projectsSlice";
+import {
+  requestDeleteTask,
+  confirmDeleteTask,
+  toggleTaskComplete,
+} from "../slices/projectsSlice";
+import { isTaskDone, canUserCompleteTask } from "../store/selectors";
 
 const HiberLink = ({ text, path, spichial }) => (
   <Link className={`duration-400 hover:text-[red] ${spichial && "font-bold"} hover:underline`} to={path}>
@@ -119,20 +125,20 @@ const DeletPopUp = ({ open, onClose, onConfirm, projectName = "" }) => {
 function ViweerSingelTaske() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   // current user (افضل تجيبها من auth slice)
-  const currentUser = useSelector((s) => s.auth?.user || null);
-  const usersList = useSelector((s) => s.auth?.usersList || s.users?.list || []);
+  const currentUser = useAppSelector((s) => s.auth?.user || null);
+  const usersList = useAppSelector((s) => s.auth?.usersList || s.users?.list || []);
 
   // 📦 هات بيانات المهمة (selector memoized)
   const selectTask = useMemo(() => makeSelectTaskDetails(id), [id]);
-  const task = useSelector(selectTask); // may be null
+  const task = useAppSelector(selectTask); // may be null
 
   // project selector (we create selector with projectId even if null -> returns null)
   const projectIdForSelector = task?.projectId ?? null;
   const selectProject = useMemo(() => makeSelectProjectById(projectIdForSelector ?? -1), [projectIdForSelector]);
-  const project = useSelector(selectProject);
+  const project = useAppSelector(selectProject);
 
   // members (convert ids -> user objects)
   const members = useMemo(() => {
@@ -142,11 +148,14 @@ function ViweerSingelTaske() {
     return mem.map((mid) => byId.get(String(mid)) || { id: mid, name: `#${mid}` });
   }, [project?.members, usersList]);
 
+
+
   // UI state
   const [deletPopUp, setDeletePopUp] = useState(false);
 
   // ⏱️ timer
   const [now, setNow] = useState(Date.now());
+
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
@@ -172,7 +181,9 @@ function ViweerSingelTaske() {
   const statusColor = chipColorByStatus(task.status);
   const priorityColor = chipColorByPriority(task.priority);
   const timerColor = isOverdue ? "text-red-600" : (msLeft != null && msLeft < 6 * 60 * 60 * 1000) ? "text-green-600" : "text-sky-600";
-  const disabled = task.status === "done" || isOverdue;
+  const done = isTaskDone(task);
+  const canComplete = canUserCompleteTask(task, currentUser?.id);
+  const disabled = done || isOverdue;
 
   // delete handler (uses roles & rules)
   const onConfirmDelete = async () => {
@@ -185,7 +196,7 @@ function ViweerSingelTaske() {
       };
 
       // is project leader OR admin?
-      const isProjectLeader = project && currentUser && Number(project.leaderId) === Number(currentUser.id);
+      const isProjectLeader = project && currentUser && project.leaderId == currentUser.id;
       const isAdmin = currentUser?.role === "admin" || currentUser?.role === "super_admin";
 
 
@@ -194,18 +205,19 @@ function ViweerSingelTaske() {
         await dispatch(confirmDeleteTask({
           ...payloadBase,
           approverId: currentUser?.id,
-          approve: true,// abroved
+          approve: true,
           Abrov: { name: currentUser.name } || null
         })).unwrap();
-        // navigate away after delete
-        navigate("/");
         return;
       }
-
+      
+      // navigate away after delete
+      navigate("/");
+      
       // // otherwise request deletion (pending)
       await dispatch(requestDeleteTask({
-        projectId:project.id,
-        taskId:task.id,
+        projectId: project.id,
+        taskId: task.id,
         userId: currentUser?.id || null
       })).unwrap(); // فيه مشكله في الحذف عندك 
 
@@ -238,7 +250,42 @@ function ViweerSingelTaske() {
       {/* Header */}
       <header className="flex  items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">{task.title || "Untitled Task"}</h1>
+          <div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              checked={done}
+              disabled={!project?.id || !canComplete}
+              title={
+                canComplete
+                  ? done
+                    ? "Mark incomplete"
+                    : "Mark complete"
+                  : "Only the assigned user can complete this task"
+              }
+              onChange={(e) => {
+                if (!project?.id || !currentUser?.id || !canComplete) return;
+                dispatch(
+                  toggleTaskComplete({
+                    projectId: project.id,
+                    taskId: task.id,
+                    completed: e.target.checked,
+                    userId: currentUser.id,
+                  })
+                );
+              }}
+              className={`mt-2 h-5 w-5 shrink-0 rounded border-gray-300 accent-green-600 focus:ring-green-500 ${
+                canComplete ? "cursor-pointer" : "cursor-not-allowed opacity-50"
+              }`}
+              aria-label={done ? "Mark task incomplete" : "Mark task complete"}
+            />
+            <h1
+              className={`text-2xl md:text-3xl font-bold ${
+                done ? "line-through text-gray-500" : ""
+              }`}
+            >
+              {task.title || "Untitled Task"}
+            </h1>
+          </div>
           {task.description && <p className="text-gray-600 mt-1">{task.description}</p>}
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <Chip label={task.status || "unknown"} className={statusColor} />
@@ -259,13 +306,13 @@ function ViweerSingelTaske() {
 
           {currentUser.role == 'admin' && (
             <motion.button
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 260, damping: 15 }}
-            className="bg-red-500 duration-200 w-fit hover:bg-red-800 p-1 rounded text-white"
-            onClick={() => setDeletePopUp(true)}
-          >
-            Delete
-          </motion.button>
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 260, damping: 15 }}
+              className="bg-red-500 duration-200 w-fit hover:bg-red-800 p-1 rounded text-white"
+              onClick={() => setDeletePopUp(true)}
+            >
+              Delete
+            </motion.button>
           )}
 
           {currentUser?.role === "admin" && (

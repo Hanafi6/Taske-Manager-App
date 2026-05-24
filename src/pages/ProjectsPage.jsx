@@ -1,43 +1,43 @@
- // pages/ProjectsPage.jsx
+// pages/ProjectsPage.jsx
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
 import ProjectCard from '../components/ProjectCard';
 import { makeSelectALLProjectsForUser } from '../store/selectors';
 import { useLocation } from 'react-router-dom';
+import { useAppSelector } from '../store/Hooks';
 
 const ProjectsPage = () => {
-  const { list, loading } = useSelector((state) => state.projects);
-  const { user, role } = useSelector((state) => state.auth);
+  const { list, loading } = useAppSelector((state) => state.projects);
+  const { user, role } = useAppSelector((state) => state.auth);
 
-   const location = useLocation();
+  const location = useLocation();
 
-      useEffect(() => {
-        if (location.state?.scroll) {
-          console.log(location.state?.scroll)
-          const { sec, id } = location.state.scroll;
-    
-          const element = document.getElementById(sec);
-          if (element) {
-            const elementRect = element.getBoundingClientRect();
-            const absoluteElementTop = elementRect.top + window.pageYOffset;
-            const middle = absoluteElementTop - (window.innerHeight / 2) + (elementRect.height / 2);
-    
-            window.scrollTo({ top: middle, behavior: 'smooth' });
-    
-            // Highlight
-            setHighlightId(sec);
-            setTarget(id); // <--- هنا بنحدد العنصر نفسه
-    
-            const timeout = setTimeout(() => {
-              setHighlightId(null);
-              setTarget(null);
-              navigate(location.pathname, { replace: true, state: {} });
-            }, 800);
-    
-            return () => clearTimeout(timeout);
-          }
-        }
-      }, [location.state]);
+  useEffect(() => {
+    if (location.state?.scroll) {
+      console.log(location.state?.scroll)
+      const { sec, id } = location.state.scroll;
+
+      const element = document.getElementById(sec);
+      if (element) {
+        const elementRect = element.getBoundingClientRect();
+        const absoluteElementTop = elementRect.top + window.pageYOffset;
+        const middle = absoluteElementTop - (window.innerHeight / 2) + (elementRect.height / 2);
+
+        window.scrollTo({ top: middle, behavior: 'smooth' });
+
+        // Highlight
+        setHighlightId(sec);
+        setTarget(id); // <--- هنا بنحدد العنصر نفسه
+
+        const timeout = setTimeout(() => {
+          setHighlightId(null);
+          setTarget(null);
+          navigate(location.pathname, { replace: true, state: {} });
+        }, 800);
+
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [location.state]);
 
   // اسم أوضح للحالة
   const [projectsToShow, setProjectsToShow] = useState([]);
@@ -48,8 +48,8 @@ const ProjectsPage = () => {
     [user?.id]
   );
 
-  // useSelector with the memoized selector
-  const scProj = useSelector((state) => selectAllProjectsForUser(state));
+  // useAppSelector with the memoized selector
+  const scProj = useAppSelector((state) => selectAllProjectsForUser(state));
 
   // effect: اختر القائمة المناسبة بناءً على الدور
   useEffect(() => {
@@ -70,17 +70,17 @@ const ProjectsPage = () => {
       <ul className="grid grid-cols-1 gap-4">
         {projectsToShow.map((project) => (
           <ProjectCard key={project.id}
-          project={project}
-          tasksForProject={[]}
-          mode={role === "admin" ? "all" : "mine"}
-          currentUserId={user.id}
-          collapsible={true}
-          defaultOpen={false}
-          showStats
-          showMeta={true}
-          mineTaskes={true}
-          clickableTitle={project.hidden ? false : true}
-          hidden={project.hidden}
+            project={project}
+            tasksForProject={[]}
+            mode={role === "admin" ? "all" : "mine"}
+            currentUserId={user.id}
+            collapsible={true}
+            defaultOpen={false}
+            showStats
+            showMeta={true}
+            mineTaskes={true}
+            clickableTitle={project.hidden ? false : true}
+            hidden={project.hidden}
           />
         ))}
       </ul>
